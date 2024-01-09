@@ -130,6 +130,14 @@ function ConROC:SpellmenuClass()
 			},
 			groupType = "checkBoxes"
 		},
+		{
+			frameName = "Debuffs",
+			spells = {
+				{spellID = ids.optionMaxIds.FaerieFire, spellCheckbox = "Debuff_FaerieFire", reqLevel = 18, type="spell"},
+				{spellID = ids.optionMaxIds.FaerieFireFeral, spellCheckbox = "Debuff_FaerieFireFeral", reqLevel = 30, type="spell"},
+			},
+			groupType = "checkBoxes"
+		},
 		--[[{
 			frameName = "Cooldowns",
 			spells = {

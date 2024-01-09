@@ -1,4 +1,9 @@
-Ver 2.0.2
+vetr 1.15.2
+	-Savage Roar spell ID fix
+	-Supported runes: Lacerate, Mangle Bear, Mangle Cat, Sunfire, Star Surge & Savage Roar
+ver 1.15.1
+	-Rune support started 
+Ver 1.15.0
 	-Support for Classic
 	-Started to add support for translations.
 Ver 1.13.5

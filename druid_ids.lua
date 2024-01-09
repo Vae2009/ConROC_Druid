@@ -220,12 +220,16 @@ local ConROC_Druid, ids = ...;
 	}
 	ids.Runes = {
 		Sunfire = 414684,
-		Mangle = 407995,
+		bMangle = 407995,
+		cMangle = 407993,
 		Lacerate = 414644,
+		StarSurge = 417157,
+		SavageRoar = 407988,
 	}
 	ids.Player_Buff = {
-		omenofClarity = 16864,
 		FuryofStormrage = 414800,
+		clearCasting = 16870,
+		SavageRoar = 407988,
 	}
 	ids.Player_Debuff = {
 
