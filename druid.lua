@@ -28,7 +28,7 @@ function ConROC:UNIT_SPELLCAST_SUCCEEDED(event, unitID, lineID, spellID)
         self.lastSpellId = spellID;
     end
 
-    ConROC:JustCasted(spellID);
+    --ConROC:JustCasted(spellID);
 end
 
 function ConROC:PopulateTalentIDs()
@@ -429,16 +429,15 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
     local clearCastingBUFF                                  = ConROC:BuffName(ids.Player_Buff.clearCasting, timeShift);
 --runes
     local rLacerateRDY                                      = ConROC:AbilityReady(_RuneLacerate, timeShift);
-        local rLacerateDEBUFF, rLacerateCount               = ConROC:TargetDebuff(_RuneLacerate, timeShift);
+        local rLacerateDEBUFF, rLacerateCount, rLacerateDUR = ConROC:TargetDebuff(_RuneLacerate, timeShift);
         local rLacerateDEBUFF2                                   = ConROC:DebuffName(_RuneLacerate, timeShift);  
-        local rLacerateDUR                                       = lacerateEXP - GetTime();
-    local rBearMangleRDY                                        = ConROC:AbilityReady(_RuneBearMangle, timeShift);
-        local rBearMangleDEBUFF                                     = ConROC:TargetDebuff(_RuneBearMangle, timeShift);
-        local rBearMangleDUR                                        = bMangleEXP - GetTime();
-    local rCatMangleRDY                                        = ConROC:AbilityReady(_RuneCatMangle, timeShift);
-        local rCatMangleDEBUFF                                     = ConROC:TargetDebuff(_RuneCatMangle, timeShift);
-        local rCatMangleDUR                                        = cMangleEXP - GetTime();
-    local rSunfireRDY                                       = ConROC:AbilityReady(_RuneSunfire, timeShift);
+    local rBearMangleRDY                                    = ConROC:AbilityReady(_RuneBearMangle, timeShift);
+        local rBearMangleDEBUFF, _, rBearMangleDUR              = ConROC:TargetDebuff(_RuneBearMangle, timeShift);
+        rBearMangleDUR = rBearMangleDUR or 0;
+    local rCatMangleRDY                                     = ConROC:AbilityReady(_RuneCatMangle, timeShift);
+        local rCatMangleDEBUFF, _, rCatMangleDUR               = ConROC:TargetDebuff(_RuneCatMangle, timeShift);
+        rCatMangleDUR = rCatMangleDUR or 0;
+   local rSunfireRDY                                       = ConROC:AbilityReady(_RuneSunfire, timeShift);
         local rSunfireDEBUFF                                    = ConROC:TargetDebuff(_RuneSunfire, timeShift);
     local rStarSurgeRDY                                     = ConROC:AbilityReady(_RuneStarSurge, timeShift);
     local rsRoarRDY                                         = ConROC:AbilityReady(_RuneSavageRoar, timeShift);
@@ -534,7 +533,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
             if clearCastingBUFF and shredRDY and not ConROC:TarYou() then
                 return _Shred;
             end
-            if rCatMangleRDY and combo < 1 then --rMangleDUR <= 1.2 then
+            if rCatMangleRDY and combo < 1 and rCatMangleDUR <= 1.2 then
                 return _RuneCatMangle;
             end
             
@@ -542,7 +541,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                 return _RuneSavageRoar;
             end
             
-            if rCatMangleRDY and combo ~= comboMax then --rMangleDUR <= 1.2 then
+            if rCatMangleRDY and combo ~= comboMax and rCatMangleDUR <= 1.2 then
                 return _RuneCatMangle;
             end
 
@@ -582,10 +581,10 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
             if rLacerateRDY and rLacerateCount == 5 and rLacerateDUR <=1.5 then
                 return _RuneLacerate;
             end
-            if rBearMangleRDY and not rBearMangleDEBUFF then --rMangleDUR <= 1.2 then
+            if rBearMangleRDY and not rBearMangleDEBUFF and rBearMangleDUR <= 1.2 then
                 return _RuneBearMangle;
             end
-            if rLacerateRDY and (rLacerateCount < 5 and rLacerateDUR <= 8) and rMangleDUR >= 2 and rage >= 15 then
+            if rLacerateRDY and (rLacerateCount < 5 and rLacerateDUR <= 8) and rage >= 15 then
                 return _RuneLacerate;
             end
             if swipeRDY and (rage >= rageMax - 40 or tarInMelee >= 3) then

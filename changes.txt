@@ -1,4 +1,6 @@
-vetr 1.15.2
+ver 1.15.3
+	-Cat and Bear rotation tweak
+ver 1.15.2
 	-Savage Roar spell ID fix
 	-Supported runes: Lacerate, Mangle Bear, Mangle Cat, Sunfire, Star Surge & Savage Roar
 ver 1.15.1
