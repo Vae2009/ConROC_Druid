@@ -11,7 +11,8 @@ ConROC.Druid = {};
 
 local ConROC_Druid, ids = ...;
 local ConROC_Druid, optionMaxIds = ...;
-local currentSpecName
+local currentSpecName;
+local currentSpecID;
 
 local lacerateEXP = 0;
 local bMangleEXP = 0;
@@ -36,36 +37,27 @@ function ConROC:PopulateTalentIDs()
     
     for tabIndex = 1, numTabs do
         local tabName = GetTalentTabInfo(tabIndex) .. "_Talent"
-        tabName = string.gsub(tabName, "%s", "") -- Remove spaces from tab name
-        if printTalentsMode then
-            print(tabName..": ")
-        else
-            ids[tabName] = {}
-        end
-        
+        tabName = string.gsub(tabName, "[^%w]", "") -- Remove spaces from tab name
+        print("ids."..tabName.." = {")
         local numTalents = GetNumTalents(tabIndex)
 
         for talentIndex = 1, numTalents do
             local name, _, _, _, _ = GetTalentInfo(tabIndex, talentIndex)
 
             if name then
-                local talentID = string.gsub(name, "%s", "") -- Remove spaces from talent name
-                if printTalentsMode then
-                    print(talentID .." = ID no: ", talentIndex)
-                else
-                    ids[tabName][talentID] = talentIndex
-                end
+                local talentID = string.gsub(name, "[^%w]", "") -- Remove spaces from talent name
+                    print(talentID .." = ", talentIndex ..",")
             end
         end
+        print("}")
     end
-    if printTalentsMode then printTalentsMode = false end
 end
-ConROC:PopulateTalentIDs()
 
 local Racial, Spec, Bal_Ability, Bal_Talent, Feral_Ability, Feral_Talent, Resto_Ability, Resto_Talent, Player_Buff, Player_Debuff, Target_Debuff = ids.Racial, ids.Spec, ids.Bal_Ability, ids.Balance_Talent, ids.Feral_Ability, ids.FeralCombat_Talent, ids.Resto_Ability, ids.Restoration_Talent, ids.Player_Buff, ids.Player_Debuff, ids.Target_Debuff;
 
 function ConROC:SpecUpdate()
     currentSpecName = ConROC:currentSpec()
+    currentSpecID = ConROC:currentSpec("ID")
 
     if currentSpecName then
        ConROC:Print(self.Colors.Info .. "Current spec:", self.Colors.Success ..  currentSpecName)
@@ -124,6 +116,8 @@ local _RuneCatMangle = ids.Runes.cMangle;
 local _RuneSunfire = ids.Runes.Sunfire;
 local _RuneStarSurge = ids.Runes.StarSurge;
 local _RuneSavageRoar = ids.Runes.SavageRoar;
+local _SkullBash = ids.Runes.SkullBash;
+
 function ConROC:UpdateSpellID()
     --Ranks
     if IsSpellKnown(ids.Bal_Ability.FaerieFireRank4) then _FaerieFire = ids.Bal_Ability.FaerieFireRank4;
@@ -329,6 +323,7 @@ function ConROC:UpdateSpellID()
         RuneSunfire = _RuneSunfire,
         RuneStarSurge = _RuneStarSurge,
         RuneSavageRoar = _RuneSavageRoar,
+        SkullBash = _SkullBash,
     }
 end
 ConROC:UpdateSpellID()
@@ -442,6 +437,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
     local rStarSurgeRDY                                     = ConROC:AbilityReady(_RuneStarSurge, timeShift);
     local rsRoarRDY                                         = ConROC:AbilityReady(_RuneSavageRoar, timeShift);
         local rsRoarBUFF, rsRoarDUR                             = ConROC:BuffName(ids.Player_Buff.SavageRoar, timeShift);
+    local sBashRDY                                             = ConROC:AbilityReady(_SkullBash, timeShift);
 
 --Conditions
     local incombat                                          = UnitAffectingCombat('player');
@@ -490,6 +486,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
     
 --Indicators
     ConROC:AbilityRaidBuffs(_MarkoftheWild, moftwRDY and not moftwBUFF);
+    ConROC:AbilityInterrupt(_SkullBash, ConROC:Interrupt() and sBashRDY)
     
 --Rotations
 --print("currentSpecName", currentSpecName);

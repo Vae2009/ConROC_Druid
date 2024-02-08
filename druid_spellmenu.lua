@@ -23,9 +23,25 @@ local scrollHeight = 0;
 local plvl = UnitLevel('player');
 
 local defaults = {
+	["ConROC_SM_Role_Caster"] = true,
+	["ConROC_Caster_DoT_Rip"] = false,
+	["ConROC_Caster_Debuff_FaerieFire"] = false,
+	["ConROC_Caster_Option_AoE"] = false,
+
+	["ConROC_SM_Role_Melee"] = false,
+	["ConROC_Melee_DoT_Rip"] = false,
+	["ConROC_Melee_Debuff_FaerieFire"] = false,
+	["ConROC_Melee_Option_AoE"] = false,
+	
 	["ConROC_SM_Role_Tank"] = false,
-	["ConROC_SM_Role_Melee"] = true,
+	["ConROC_Tank_DoT_Rip"] = false,	
+	["ConROC_Tank_Debuff_FaerieFire"] = false,
+	["ConROC_Tank_Option_AoE"] = false,
+
 	["ConROC_SM_Role_PvP"] = false,
+	["ConROC_PvP_DoT_Rip"] = false,
+	["ConROC_PvP_Debuff_FaerieFire"] = false,
+	["ConROC_PvP_Option_AoE"] = false,
 }
 
 ConROCDruidSpells = ConROCDruidSpells or defaults;
@@ -736,7 +752,7 @@ function ConROC:SpellMenuUpdate(newSpell)
 						oItem:SetPoint("TOPLEFT", lFrame, "BOTTOMLEFT", 0, 0);
 					end
 					if type(_spellData.spellID) == "number" then
-						if plvl >= _spellData.reqLevel and IsSpellKnown(_spellData.spellID) then
+						if plvl >= _spellData.reqLevel and (IsSpellKnown(_spellData.spellID) or IsSpellKnownOrOverridesKnown(_spellData.spellID)) then
 							lFrame = oItem;
 							lFrame:Show();
 							if oItem:IsShown() then
@@ -824,7 +840,7 @@ function ConROC:SpellMenuUpdate(newSpell)
 					else
 						oItem:SetPoint("TOPLEFT", lFrame, "BOTTOMLEFT", 0, 0);
 					end
-					if plvl >= _spellData.reqLevel and IsSpellKnown(_spellData.spellID) then													
+					if plvl >= _spellData.reqLevel and (IsSpellKnown(_spellData.spellID) or IsSpellKnownOrOverridesKnown(_spellData.spellID)) then
 						lFrame = oItem;
 						lFrame:Show();
 							if oItem:IsShown() then

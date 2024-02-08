@@ -70,6 +70,24 @@ local ConROC_Druid, ids = ...;
 		WrathRank7 = 8905,
 		WrathRank8 = 9912,
 	}
+	ids.Balance_Talent = { 
+		NaturesGrasp =  1, 
+		ImprovedWrath =  2, 
+		ImprovedMoonfire =  3, 
+		NaturesReach =  4, 
+		NaturalShapeshifter =  5, 
+		ImprovedThorns =  6, 
+		Moonglow =  7, 
+		ImprovedStarfire =  8, 
+		ImprovedEntanglingRoots =  9, 
+		OmenofClarity =  10, 
+		NaturesGrace =  11, 
+		Moonfury =  12, 
+		NaturalWeapons =  13, 
+		Vengeance =  14, 
+		MoonkinForm =  15, 
+		ImprovedNaturesGrasp =  16, 
+	} 
 --Feral
 	ids.Feral_Ability = {
 		FaerieFireFeralRank1 = 16857,
@@ -158,6 +176,24 @@ local ConROC_Druid, ids = ...;
 		SwipeRank4 = 9754,
 		SwipeRank5 = 9908,
 	}
+	ids.FeralCombat_Talent = { 
+		ThickHide =  1, 
+		FeralAggression =  2, 
+		Ferocity =  3, 
+		BrutalImpact =  4, 
+		SharpenedClaws =  5, 
+		FeralInstinct =  6, 
+		BloodFrenzy =  7, 
+		PrimalFury =  8, 
+		ImprovedShred =  9, 
+		PredatoryStrikes =  10, 
+		FeralCharge =  11, 
+		SavageFury =  12, 
+		FelineSwiftness =  13, 
+		HeartoftheWild =  14, 
+		LeaderofthePack =  15, 
+		FaerieFireFeral =  16, 
+	} 
 --Restoration
 	ids.Resto_Ability = {
 		AbolishPoison = 2893,
@@ -218,6 +254,23 @@ local ConROC_Druid, ids = ...;
 		TranquilityRank3 = 9862,
 		TranquilityRank4 = 9863,
 	}
+	ids.Restoration_Talent = { 
+		ImprovedMarkoftheWild =  1, 
+		Furor =  2, 
+		NaturesFocus =  3, 
+		ImprovedHealingTouch =  4, 
+		ImprovedRegrowth =  5, 
+		ImprovedEnrage =  6, 
+		InsectSwarm =  7, 
+		GiftofNature =  8, 
+		Reflection =  9, 
+		ImprovedRejuvenation =  10, 
+		NaturesSwiftness =  11, 
+		Subtlety =  12, 
+		ImprovedTranquility =  13, 
+		TranquilSpirit =  14, 
+		Swiftmend =  15, 
+	}
 	ids.Runes = {
 		Sunfire = 414684,
 		bMangle = 407995,
@@ -225,6 +278,9 @@ local ConROC_Druid, ids = ...;
 		Lacerate = 414644,
 		StarSurge = 417157,
 		SavageRoar = 407988,
+		SkullBash = 410176,
+		KingoftheJungle = 417046, --phase 2 - passive
+		Eclipse = 408248, --phase 2 - passive
 	}
 	ids.Player_Buff = {
 		FuryofStormrage = 414800,
