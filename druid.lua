@@ -446,7 +446,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
     local mounted = IsMounted()
     local targetPh                                          = ConROC:PercentHealth('target');   
     local moving                                            = ConROC:PlayerSpeed();
-    local inMelee                                           = CheckInteractDistance("target", 3);
+    local inMelee                                           = ConROC:IsMeleeRange()--CheckInteractDistance("target", 3);
     local isEnemy                                           = ConROC:TarHostile();
     local tarInMelee                                        = 0;
     
