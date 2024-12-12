@@ -2,7 +2,7 @@ local ConROC_Druid, ids = ...;
 
 --General
 ids.Racial = {
-
+	Shadowmeld = 20580,
 }
 ids.Spec = {
 	Balance = 1,

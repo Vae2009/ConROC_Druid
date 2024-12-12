@@ -221,7 +221,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
     ConROC:AbilityInterrupt(_SkullBash, ConROC:Interrupt() and _SkullBash_RDY)
 
 --Rotations
-    --[[if ConROC.Seasons.IsSoD then
+    if ConROC.Seasons.IsSoD then
         if _is_stealthed and _CatForm_FORM then
             if _TigersFury_RDY and not _TigersFury_BUFF and _Energy >= 80 then
                 return _TigersFury;
@@ -400,7 +400,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                 return _Wrath;
             end
         end
-    else --not SoD]]
+    else --not SoD
         if _is_stealthed and _CatForm_FORM then
             if _TigersFury_RDY and not _TigersFury_BUFF and _Energy >= 80 then
                 return _TigersFury;
@@ -540,7 +540,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                 return _Wrath;
             end
         end
-    --end
+    end
     return nil;
 end
 
