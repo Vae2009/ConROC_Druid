@@ -72,10 +72,10 @@ local _Rage, _Rage_Max = ConROC:PlayerPower('Rage');
 --Conditions
 local _Queue = 0;
 local _is_moving = ConROC:PlayerSpeed();
---local _enemies_in_melee, _target_in_melee = ConROC:Targets("Melee");
---local _enemies_in_10yrds, _target_in_10yrds = ConROC:Targets("10");
---local _enemies_in_25yrds, _target_in_25yrds = ConROC:Targets("25");
---local _enemies_in_40yrds, _target_in_40yrds = ConROC:Targets("40");
+local _enemies_in_melee, _target_in_melee = ConROC:Targets("Melee");
+local _enemies_in_10yrds, _target_in_10yrds = ConROC:Targets("10");
+local _enemies_in_20yrds, _target_in_20yrds = ConROC:Targets("20");
+local _enemies_in_40yrds, _target_in_40yrds = ConROC:Targets("40");
 local _can_Execute = _Target_Percent_Health < 20;
 
 --Racials
@@ -99,10 +99,10 @@ function ConROC:Stats()
 
 	_Queue = 0;
 	_is_moving = ConROC:PlayerSpeed();
---	_enemies_in_melee, _target_in_melee = ConRO:Targets("Melee");
---	_enemies_in_10yrds, _target_in_10yrds = ConRO:Targets("10");
---	_enemies_in_25yrds, _target_in_25yrds = ConRO:Targets("25");
---	_enemies_in_40yrds, _target_in_40yrds = ConRO:Targets("40");
+	_enemies_in_melee, _target_in_melee = ConROC:Targets("Melee");
+	_enemies_in_10yrds, _target_in_10yrds = ConROC:Targets("10");
+	_enemies_in_20yrds, _target_in_20yrds = ConROC:Targets("20");
+	_enemies_in_40yrds, _target_in_40yrds = ConROC:Targets("40");
 	_can_Execute = _Target_Percent_Health < 20;
 end
 
@@ -181,13 +181,6 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
 
 --Conditions
     local _is_stealthed = IsStealthed();
-    local tarInMelee = 0;
-
-    if _Player_Level >= 10 and IsSpellKnown(Feral_Ability.Growl) then
-        tarInMelee = ConROC:Targets(Feral_Ability.Growl);
-    elseif _Player_Level >= 20 and IsSpellKnown(_Claw) then
-        tarInMelee = ConROC:Targets(_Claw);
-    end
 
     local _Maul_COST = 15;
     local _Swipe_COST = 20;
@@ -313,7 +306,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
             if _Lacerate_RDY and (_Lacerate_COUNT < 5 and _Lacerate_DUR <= 8) and _Rage >= 15 then
                 return _RuneLacerate;
             end
-            if _Swipe_RDY and (_Rage >= _Rage_Max - 40 or tarInMelee >= 3) then
+            if _Swipe_RDY and (_Rage >= _Rage_Max - 40 or _target_in_melee >= 3) then
                 return _Swipe;
             end
             --ConROC:AbilityTaunt(_Maul, _Maul_RDY);
@@ -338,14 +331,14 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
         --           return _Wrath;
         --        end 
         --    end
-        --    if _Hurricane_RDY and (tarInMelee >= 4 or ConROC_AoEButton:IsVisible()) then
+        --    if _Hurricane_RDY and (_target_in_melee >= 4 or ConROC_AoEButton:IsVisible()) then
         --        return _Hurricane;
         --    end
 
             if _StarSurge_RDY then
                 return _RuneStarSurge;
             end
-            
+
             if _Sunfire_RDY and not _Sunfire_DEBUFF then
                 return _RuneSunfire;
             end
@@ -361,7 +354,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
             if _FaerieFire_RDY and not (_FaerieFire_UP or _FaerieFireFeral_UP) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFire) then
                 return _FaerieFire;
             end
-            
+
             if _InsectSwarm_RDY and not _InsectSwarm_DEBUFF then
                 return _InsectSwarm
             end
@@ -391,7 +384,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
             if _FaerieFire_RDY and not (_FaerieFire_UP or _FaerieFireFeral_UP) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFire) then
                 return _FaerieFire;
             end
-            
+
             if _InsectSwarm_RDY and not _InsectSwarm_DEBUFF then
                 return _InsectSwarm
             end
@@ -471,7 +464,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                 return _Maul;
             end
 
-            if _Swipe_RDY and (_Rage >= _Rage_Max - 40 or tarInMelee >= 3) then
+            if _Swipe_RDY and (_Rage >= _Rage_Max - 40 or _target_in_melee >= 3) then
                 return _Swipe;
             end
 
@@ -493,7 +486,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                 end
             end
 
-            if _Hurricane_RDY and (tarInMelee >= 4 or ConROC_AoEButton:IsVisible()) then
+            if _Hurricane_RDY and (_target_in_melee >= 4 or ConROC_AoEButton:IsVisible()) then
                 return _Hurricane;
             end
 
