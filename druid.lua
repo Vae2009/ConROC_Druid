@@ -1,24 +1,19 @@
-local printTalentsMode = false
-
--- Slash command for printing talent tree with talent names and ID numbers
-SLASH_CONROCPRINTTALENTS1 = "/ConROCPT"
-SlashCmdList["CONROCPRINTTALENTS"] = function()
-    printTalentsMode = not printTalentsMode
-    ConROC:PopulateTalentIDs()
-end
-
 ConROC.Druid = {};
 
 local ConROC_Druid, ids = ...;
-local ConROC_Druid, optionMaxIds = ...;
 local currentSpecName;
 local currentSpecID;
 
-local lacerateEXP = 0;
-local bMangleEXP = 0;
-local cMangleEXP = 0;
-local demoRoarEXP = 0;
-local lastEclipse;
+function ConROC:EnableRotationModule()
+    self.Description = 'Druid';
+    self.NextSpell = ConROC.Druid.Damage;
+
+    self:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED');
+    self:RegisterEvent("PLAYER_TALENT_UPDATE");
+    self.lastSpellId = 0;
+
+    ConROC:PowerShift();
+end
 
 function ConROC:EnableDefenseModule()
     self.NextDef = ConROC.Druid.Defense;
@@ -32,28 +27,12 @@ function ConROC:UNIT_SPELLCAST_SUCCEEDED(event, unitID, lineID, spellID)
     --ConROC:JustCasted(spellID);
 end
 
-function ConROC:PopulateTalentIDs()
-    local numTabs = GetNumTalentTabs()
-    
-    for tabIndex = 1, numTabs do
-        local tabName = GetTalentTabInfo(tabIndex) .. "_Talent"
-        tabName = string.gsub(tabName, "[^%w]", "") -- Remove spaces from tab name
-        print("ids."..tabName.." = {")
-        local numTalents = GetNumTalents(tabIndex)
-
-        for talentIndex = 1, numTalents do
-            local name, _, _, _, _ = GetTalentInfo(tabIndex, talentIndex)
-
-            if name then
-                local talentID = string.gsub(name, "[^%w]", "") -- Remove spaces from talent name
-                    print(talentID .." = ", talentIndex ..",")
-            end
-        end
-        print("}")
-    end
-end
-
-local Racial, Spec, Bal_Ability, Bal_Talent, Feral_Ability, Feral_Talent, Resto_Ability, Resto_Talent, Player_Buff, Player_Debuff, Target_Debuff = ids.Racial, ids.Spec, ids.Bal_Ability, ids.Balance_Talent, ids.Feral_Ability, ids.FeralCombat_Talent, ids.Resto_Ability, ids.Restoration_Talent, ids.Player_Buff, ids.Player_Debuff, ids.Target_Debuff;
+local Racial, Spec, Ability, Bal_Talent, Feral_Talent, Resto_Talent, Runes, Buff, Debuff = ids.Racial, ids.Spec, ids.Ability, ids.Balance_Talent, ids.FeralCombat_Talent, ids.Restoration_Talent, ids.Runes, ids.Buff, ids.Debuff;
+local lacerateEXP = 0;
+local bMangleEXP = 0;
+local cMangleEXP = 0;
+local demoRoarEXP = 0;
+local lastEclipse;
 
 function ConROC:SpecUpdate()
     currentSpecName = ConROC:currentSpec()
@@ -65,530 +44,280 @@ function ConROC:SpecUpdate()
        ConROC:Print(self.Colors.Error .. "You do not currently have a spec.")
     end
 end
+
 ConROC:SpecUpdate()
 
-local _EntanglingRoots = Bal_Ability.EntanglingRootsRank1;
-local _FaerieFire = Bal_Ability.FaerieFireRank1;
-local _Hibernate = Bal_Ability.HibernateRank1;
-local _Hurricane = Bal_Ability.HurricaneRank1;
-local _Moonfire = Bal_Ability.MoonfireRank1;
-local _NaturesGrasp = Bal_Ability.NaturesGraspRank1;
-local _SootheAnimal = Bal_Ability.SootheAnimalRank1;
-local _Starfire = Bal_Ability.StarfireRank1;
-local _Thorns = Bal_Ability.ThornsRank1;
-local _Wrath = Bal_Ability.WrathRank1;
-
-local _Bash = Feral_Ability.BashRank1;
-local _BearForm = Feral_Ability.BearForm;
-local _ChallengingRoar = Feral_Ability.ChallengingRoar;
-local _Claw = Feral_Ability.ClawRank1;
-local _Cower = Feral_Ability.CowerRank1;
-local _Dash = Feral_Ability.DashRank1;
-local _DemoralizingRoar = Feral_Ability.DemoralizingRoarRank1;
-local _FaerieFireFeral = Feral_Ability.FaerieFireFeralRank1;
-local _FeralCharge = Feral_Ability.FeralCharge;
-local _FerociousBite = Feral_Ability.FerociousBiteRank1;
-local _FrenziedRegeneration = Feral_Ability.FrenziedRegenerationRank1;
-local _Growl = Feral_Ability.GrowlRank1
-local _Maul = Feral_Ability.MaulRank1;
-local _Pounce = Feral_Ability.PounceRank1;
-local _Prowl = Feral_Ability.ProwlRank1;
-local _Rake = Feral_Ability.RakeRank1;
-local _Ravage = Feral_Ability.RavageRank1;
-local _Rip = Feral_Ability.RipRank1;
-local _Shred = Feral_Ability.ShredRank1;
-local _Swipe = Feral_Ability.SwipeRank1;
-local _TigersFury = Feral_Ability.TigersFuryRank1;
-
-local _HealingTouch = Resto_Ability.HealingTouchRank1;
-local _InsectSwarm = Resto_Ability.InsectSwarmRank1;
-local _MarkoftheWild = Resto_Ability.MarkoftheWildRank1;
-local _GiftoftheWild = Resto_Ability.GiftoftheWildRank1;
-local _Rebirth = Resto_Ability.RebirthRank1;
-local _Regrowth = Resto_Ability.RegrowthRank1;
-local _Rejuvenation = Resto_Ability.RejuvenationRank1;
-local _Swiftmend = Resto_Ability.Swiftmend;
-local _Tranquility = Resto_Ability.TranquilityRank1;
---Runes
-local _RuneLacerate = ids.Runes.Lacerate;
-local _RuneBearMangle = ids.Runes.bMangle;
-local _RuneCatMangle = ids.Runes.cMangle;
-local _RuneSunfire = ids.Runes.Sunfire;
-local _RuneStarSurge = ids.Runes.StarSurge;
-local _RuneSavageRoar = ids.Runes.SavageRoar;
-local _SkullBash = ids.Runes.SkullBash;
-
-function ConROC:UpdateSpellID()
-    --Ranks
-    if IsSpellKnown(ids.Bal_Ability.FaerieFireRank4) then _FaerieFire = ids.Bal_Ability.FaerieFireRank4;
-    elseif IsSpellKnown(ids.Bal_Ability.FaerieFireRank3) then _FaerieFire = ids.Bal_Ability.FaerieFireRank3;
-    elseif IsSpellKnown(ids.Bal_Ability.FaerieFireRank2) then _FaerieFire = ids.Bal_Ability.FaerieFireRank2; end
-    
-    if IsSpellKnown(ids.Bal_Ability.HibernateRank3) then _Hibernate = ids.Bal_Ability.HibernateRank3;
-    elseif IsSpellKnown(ids.Bal_Ability.HibernateRank2) then _Hibernate = ids.Bal_Ability.HibernateRank2; end
-    
-    if IsSpellKnown(ids.Bal_Ability.HurricaneRank3) then _Hurricane = ids.Bal_Ability.HurricaneRank3;
-    elseif IsSpellKnown(ids.Bal_Ability.HurricaneRank2) then _Hurricane = ids.Bal_Ability.HurricaneRank2; end
-    
-    if IsSpellKnown(ids.Bal_Ability.MoonfireRank10) then _Moonfire = ids.Bal_Ability.MoonfireRank10;
-    elseif IsSpellKnown(ids.Bal_Ability.MoonfireRank9) then _Moonfire = ids.Bal_Ability.MoonfireRank9;
-    elseif IsSpellKnown(ids.Bal_Ability.MoonfireRank8) then _Moonfire = ids.Bal_Ability.MoonfireRank8;
-    elseif IsSpellKnown(ids.Bal_Ability.MoonfireRank7) then _Moonfire = ids.Bal_Ability.MoonfireRank7;
-    elseif IsSpellKnown(ids.Bal_Ability.MoonfireRank6) then _Moonfire = ids.Bal_Ability.MoonfireRank6;
-    elseif IsSpellKnown(ids.Bal_Ability.MoonfireRank5) then _Moonfire = ids.Bal_Ability.MoonfireRank5;
-    elseif IsSpellKnown(ids.Bal_Ability.MoonfireRank4) then _Moonfire = ids.Bal_Ability.MoonfireRank4;
-    elseif IsSpellKnown(ids.Bal_Ability.MoonfireRank3) then _Moonfire = ids.Bal_Ability.MoonfireRank3;
-    elseif IsSpellKnown(ids.Bal_Ability.MoonfireRank2) then _Moonfire = ids.Bal_Ability.MoonfireRank2; end
-    
-    if IsSpellKnown(ids.Bal_Ability.SootheAnimalRank3) then _SootheAnimal = ids.Bal_Ability.SootheAnimalRank3;
-    elseif IsSpellKnown(ids.Bal_Ability.SootheAnimalRank2) then _SootheAnimal = ids.Bal_Ability.SootheAnimalRank2; end
-    
-    if IsSpellKnown(ids.Bal_Ability.StarfireRank6) then _Starfire = ids.Bal_Ability.StarfireRank6;
-    elseif IsSpellKnown(ids.Bal_Ability.StarfireRank5) then _Starfire = ids.Bal_Ability.StarfireRank5;
-    elseif IsSpellKnown(ids.Bal_Ability.StarfireRank4) then _Starfire = ids.Bal_Ability.StarfireRank4;
-    elseif IsSpellKnown(ids.Bal_Ability.StarfireRank3) then _Starfire = ids.Bal_Ability.StarfireRank3;
-    elseif IsSpellKnown(ids.Bal_Ability.StarfireRank2) then _Starfire = ids.Bal_Ability.StarfireRank2; end
-    
-    if IsSpellKnown(ids.Bal_Ability.WrathRank8) then _Wrath = ids.Bal_Ability.WrathRank8;
-    elseif IsSpellKnown(ids.Bal_Ability.WrathRank7) then _Wrath = ids.Bal_Ability.WrathRank7;
-    elseif IsSpellKnown(ids.Bal_Ability.WrathRank6) then _Wrath = ids.Bal_Ability.WrathRank6;
-    elseif IsSpellKnown(ids.Bal_Ability.WrathRank5) then _Wrath = ids.Bal_Ability.WrathRank5;
-    elseif IsSpellKnown(ids.Bal_Ability.WrathRank4) then _Wrath = ids.Bal_Ability.WrathRank4;
-    elseif IsSpellKnown(ids.Bal_Ability.WrathRank3) then _Wrath = ids.Bal_Ability.WrathRank3;
-    elseif IsSpellKnown(ids.Bal_Ability.WrathRank2) then _Wrath = ids.Bal_Ability.WrathRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.BashRank3) then _Bash = ids.Feral_Ability.BashRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.BashRank2) then _Bash = ids.Feral_Ability.BashRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.DireBearForm) then _BearForm = ids.Feral_Ability.DireBearForm; end
-    
-    if IsSpellKnown(ids.Feral_Ability.ClawRank5) then _Claw = ids.Feral_Ability.ClawRank5;
-    elseif IsSpellKnown(ids.Feral_Ability.ClawRank4) then _Claw = ids.Feral_Ability.ClawRank4;
-    elseif IsSpellKnown(ids.Feral_Ability.ClawRank3) then _Claw = ids.Feral_Ability.ClawRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.ClawRank2) then _Claw = ids.Feral_Ability.ClawRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.DashRank2) then _Dash = ids.Feral_Ability.DashRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.FaerieFireFeralRank4) then _FaerieFireFeral = ids.Feral_Ability.FaerieFireFeralRank4;
-    elseif IsSpellKnown(ids.Feral_Ability.FaerieFireFeralRank3) then _FaerieFireFeral = ids.Feral_Ability.FaerieFireFeralRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.FaerieFireFeralRank2) then _FaerieFireFeral = ids.Feral_Ability.FaerieFireFeralRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.FerociousBiteRank4) then _FerociousBite = ids.Feral_Ability.FerociousBiteRank4;
-    elseif IsSpellKnown(ids.Feral_Ability.FerociousBiteRank3) then _FerociousBite = ids.Feral_Ability.FerociousBiteRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.FerociousBiteRank2) then _FerociousBite = ids.Feral_Ability.FerociousBiteRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.MaulRank7) then _Maul = ids.Feral_Ability.MaulRank7;
-    elseif IsSpellKnown(ids.Feral_Ability.MaulRank6) then _Maul = ids.Feral_Ability.MaulRank6;
-    elseif IsSpellKnown(ids.Feral_Ability.MaulRank5) then _Maul = ids.Feral_Ability.MaulRank5;
-    elseif IsSpellKnown(ids.Feral_Ability.MaulRank4) then _Maul = ids.Feral_Ability.MaulRank4;
-    elseif IsSpellKnown(ids.Feral_Ability.MaulRank3) then _Maul = ids.Feral_Ability.MaulRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.MaulRank2) then _Maul = ids.Feral_Ability.MaulRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.PounceRank3) then _Pounce = ids.Feral_Ability.PounceRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.PounceRank2) then _Pounce = ids.Feral_Ability.PounceRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.ProwlRank3) then _Prowl = ids.Feral_Ability.ProwlRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.ProwlRank2) then _Prowl = ids.Feral_Ability.ProwlRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.RakeRank4) then _Rake = ids.Feral_Ability.RakeRank4;
-    elseif IsSpellKnown(ids.Feral_Ability.RakeRank3) then _Rake = ids.Feral_Ability.RakeRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.RakeRank2) then _Rake = ids.Feral_Ability.RakeRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.RavageRank4) then _Ravage = ids.Feral_Ability.RavageRank4;
-    elseif IsSpellKnown(ids.Feral_Ability.RavageRank3) then _Ravage = ids.Feral_Ability.RavageRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.RavageRank2) then _Ravage = ids.Feral_Ability.RavageRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.RipRank6) then _Rip = ids.Feral_Ability.RipRank6;
-    elseif IsSpellKnown(ids.Feral_Ability.RipRank5) then _Rip = ids.Feral_Ability.RipRank5;
-    elseif IsSpellKnown(ids.Feral_Ability.RipRank4) then _Rip = ids.Feral_Ability.RipRank4;
-    elseif IsSpellKnown(ids.Feral_Ability.RipRank3) then _Rip = ids.Feral_Ability.RipRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.RipRank2) then _Rip = ids.Feral_Ability.RipRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.ShredRank5) then _Shred = ids.Feral_Ability.ShredRank5;
-    elseif IsSpellKnown(ids.Feral_Ability.ShredRank4) then _Shred = ids.Feral_Ability.ShredRank4;
-    elseif IsSpellKnown(ids.Feral_Ability.ShredRank3) then _Shred = ids.Feral_Ability.ShredRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.ShredRank2) then _Shred = ids.Feral_Ability.ShredRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.SwipeRank5) then _Swipe = ids.Feral_Ability.SwipeRank5;
-    elseif IsSpellKnown(ids.Feral_Ability.SwipeRank4) then _Swipe = ids.Feral_Ability.SwipeRank4;
-    elseif IsSpellKnown(ids.Feral_Ability.SwipeRank3) then _Swipe = ids.Feral_Ability.SwipeRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.SwipeRank2) then _Swipe = ids.Feral_Ability.SwipeRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.TigersFuryRank4) then _TigersFury = ids.Feral_Ability.TigersFuryRank4;
-    elseif IsSpellKnown(ids.Feral_Ability.TigersFuryRank3) then _TigersFury = ids.Feral_Ability.TigersFuryRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.TigersFuryRank2) then _TigersFury = ids.Feral_Ability.TigersFuryRank2; end
-    
-    if IsSpellKnown(ids.Resto_Ability.HealingTouchRank10) then _HealingTouch = ids.Resto_Ability.HealingTouchRank10;
-    elseif IsSpellKnown(ids.Resto_Ability.HealingTouchRank9) then _HealingTouch = ids.Resto_Ability.HealingTouchRank9;
-    elseif IsSpellKnown(ids.Resto_Ability.HealingTouchRank8) then _HealingTouch = ids.Resto_Ability.HealingTouchRank8;
-    elseif IsSpellKnown(ids.Resto_Ability.HealingTouchRank7) then _HealingTouch = ids.Resto_Ability.HealingTouchRank7;
-    elseif IsSpellKnown(ids.Resto_Ability.HealingTouchRank6) then _HealingTouch = ids.Resto_Ability.HealingTouchRank6;
-    elseif IsSpellKnown(ids.Resto_Ability.HealingTouchRank5) then _HealingTouch = ids.Resto_Ability.HealingTouchRank5;
-    elseif IsSpellKnown(ids.Resto_Ability.HealingTouchRank4) then _HealingTouch = ids.Resto_Ability.HealingTouchRank4;
-    elseif IsSpellKnown(ids.Resto_Ability.HealingTouchRank3) then _HealingTouch = ids.Resto_Ability.HealingTouchRank3;
-    elseif IsSpellKnown(ids.Resto_Ability.HealingTouchRank2) then _HealingTouch = ids.Resto_Ability.HealingTouchRank2; end
-    
-    if IsSpellKnown(ids.Resto_Ability.InsectSwarmRank5) then _InsectSwarm = ids.Resto_Ability.InsectSwarmRank5;
-    elseif IsSpellKnown(ids.Resto_Ability.InsectSwarmRank4) then _InsectSwarm = ids.Resto_Ability.InsectSwarmRank4;
-    elseif IsSpellKnown(ids.Resto_Ability.InsectSwarmRank3) then _InsectSwarm = ids.Resto_Ability.InsectSwarmRank3;
-    elseif IsSpellKnown(ids.Resto_Ability.InsectSwarmRank2) then _InsectSwarm = ids.Resto_Ability.InsectSwarmRank2; end
-    
-    if IsSpellKnown(ids.Resto_Ability.MarkoftheWildRank7) then _MarkoftheWild = ids.Resto_Ability.MarkoftheWildRank7;
-    elseif IsSpellKnown(ids.Resto_Ability.MarkoftheWildRank6) then _MarkoftheWild = ids.Resto_Ability.MarkoftheWildRank6;
-    elseif IsSpellKnown(ids.Resto_Ability.MarkoftheWildRank5) then _MarkoftheWild = ids.Resto_Ability.MarkoftheWildRank5;
-    elseif IsSpellKnown(ids.Resto_Ability.MarkoftheWildRank4) then _MarkoftheWild = ids.Resto_Ability.MarkoftheWildRank4;
-    elseif IsSpellKnown(ids.Resto_Ability.MarkoftheWildRank3) then _MarkoftheWild = ids.Resto_Ability.MarkoftheWildRank3;
-    elseif IsSpellKnown(ids.Resto_Ability.MarkoftheWildRank2) then _MarkoftheWild = ids.Resto_Ability.MarkoftheWildRank2; end
-    
-    if IsSpellKnown(ids.Resto_Ability.RebirthRank5) then _Rebirth = ids.Resto_Ability.RebirthRank5;
-    elseif IsSpellKnown(ids.Resto_Ability.RebirthRank4) then _Rebirth = ids.Resto_Ability.RebirthRank4;
-    elseif IsSpellKnown(ids.Resto_Ability.RebirthRank3) then _Rebirth = ids.Resto_Ability.RebirthRank3;
-    elseif IsSpellKnown(ids.Resto_Ability.RebirthRank2) then _Rebirth = ids.Resto_Ability.RebirthRank2; end
-    
-    if IsSpellKnown(ids.Resto_Ability.RegrowthRank9) then _Regrowth = ids.Resto_Ability.RegrowthRank9;
-    elseif IsSpellKnown(ids.Resto_Ability.RegrowthRank8) then _Regrowth = ids.Resto_Ability.RegrowthRank8;
-    elseif IsSpellKnown(ids.Resto_Ability.RegrowthRank7) then _Regrowth = ids.Resto_Ability.RegrowthRank7;
-    elseif IsSpellKnown(ids.Resto_Ability.RegrowthRank6) then _Regrowth = ids.Resto_Ability.RegrowthRank6;
-    elseif IsSpellKnown(ids.Resto_Ability.RegrowthRank5) then _Regrowth = ids.Resto_Ability.RegrowthRank5;
-    elseif IsSpellKnown(ids.Resto_Ability.RegrowthRank4) then _Regrowth = ids.Resto_Ability.RegrowthRank4;
-    elseif IsSpellKnown(ids.Resto_Ability.RegrowthRank3) then _Regrowth = ids.Resto_Ability.RegrowthRank3;
-    elseif IsSpellKnown(ids.Resto_Ability.RegrowthRank2) then _Regrowth = ids.Resto_Ability.RegrowthRank2; end
-    
-    if IsSpellKnown(ids.Resto_Ability.RejuvenationRank10) then _Rejuvenation = ids.Resto_Ability.RejuvenationRank10;
-    elseif IsSpellKnown(ids.Resto_Ability.RejuvenationRank9) then _Rejuvenation = ids.Resto_Ability.RejuvenationRank9;
-    elseif IsSpellKnown(ids.Resto_Ability.RejuvenationRank8) then _Rejuvenation = ids.Resto_Ability.RejuvenationRank8;
-    elseif IsSpellKnown(ids.Resto_Ability.RejuvenationRank7) then _Rejuvenation = ids.Resto_Ability.RejuvenationRank7;
-    elseif IsSpellKnown(ids.Resto_Ability.RejuvenationRank6) then _Rejuvenation = ids.Resto_Ability.RejuvenationRank6;
-    elseif IsSpellKnown(ids.Resto_Ability.RejuvenationRank5) then _Rejuvenation = ids.Resto_Ability.RejuvenationRank5;
-    elseif IsSpellKnown(ids.Resto_Ability.RejuvenationRank4) then _Rejuvenation = ids.Resto_Ability.RejuvenationRank4;
-    elseif IsSpellKnown(ids.Resto_Ability.RejuvenationRank3) then _Rejuvenation = ids.Resto_Ability.RejuvenationRank3;
-    elseif IsSpellKnown(ids.Resto_Ability.RejuvenationRank2) then _Rejuvenation = ids.Resto_Ability.RejuvenationRank2; end
-    
-    if IsSpellKnown(ids.Resto_Ability.TranquilityRank4) then _Tranquility = ids.Resto_Ability.TranquilityRank4;
-    elseif IsSpellKnown(ids.Resto_Ability.TranquilityRank3) then _Tranquility = ids.Resto_Ability.TranquilityRank3;
-    elseif IsSpellKnown(ids.Resto_Ability.TranquilityRank2) then _Tranquility = ids.Resto_Ability.TranquilityRank2; end
-
-    ids.optionMaxIds = {
-        --Balance
-        EntanglingRoots = _EntanglingRoots,
-        FaerieFire = _FaerieFire,
-        Hibernate = _Hibernate,
-        Hurricane = _Hurricane,
-        InsectSwarm = _InsectSwarm,
-        Moonfire = _Moonfire,
-        NaturesGrasp = _NaturesGrasp,
-        SootheAnimal = _SootheAnimal,
-        Starfall = _Starfall,
-        Starfire = _Starfire,
-        Thorns = _Thorns,
-        Typhoon = _Typhoon,
-        Wrath = _Wrath,
-        --Feral
-        Bash = _Bash,
-        BearForm = _BearForm,
-        Claw = _Claw,
-        Cower = _Cower,
-        Dash = _Dash,
-        DemoralizingRoar = _DemoralizingRoar,
-        FaerieFireFeral = _FaerieFireFeral,
-        FeralCharge = _FeralCharge,
-        FerociousBite = _FerociousBite,
-        FrenziedRegeneration = _FrenziedRegeneration,
-        Growl = _Growl,
-        Maul = _Maul,
-        Pounce = _Pounce,
-        Prowl = _Prowl,
-        Rake = _Rake,
-        Ravage = _Ravage,
-        Rip = _Rip,
-        Shred = _Shred,
-        SurvivalInstincts = _SurvivalInstincts,
-        SwipeBear = _SwipeBear,
-        SwipeCat = _SwipeCat,
-        TigersFury = _TigersFury,
-        --Resto
-        HealingTouch = _HealingTouch,
-        Lifebloom = _Lifebloom,
-        MarkoftheWild = _MarkoftheWild,
-        Nourish = _Nourish,
-        GiftoftheWild = _GiftoftheWild,
-        Rebirth = _Rebirth,
-        Regrowth = _Regrowth,
-        Rejuvenation = _Rejuvenation,
-        Tranquility = _Tranquility,
-        --Runes
-        RuneLacerate = _RuneLacerate,
-        RuneBearMangle = _RuneBearMangle,
-        RuneCatMangle = _RuneCatMangle,
-        RuneSunfire = _RuneSunfire,
-        RuneStarSurge = _RuneStarSurge,
-        RuneSavageRoar = _RuneSavageRoar,
-        SkullBash = _SkullBash,
-    }
-end
-ConROC:UpdateSpellID()
-
-function ConROC:EnableRotationModule()
-    self.Description = 'Druid';
-    self.NextSpell = ConROC.Druid.Damage;
-
-    self:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED');
-    self:RegisterEvent("PLAYER_TALENT_UPDATE");
-    self.lastSpellId = 0;
-
-    ConROC:PowerShift();
-    ConROC:SpellmenuClass();
-end
 function ConROC:PLAYER_TALENT_UPDATE()
     ConROC:SpecUpdate();
     ConROC:closeSpellmenu();
 end
 
-function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
-    ConROC:UpdateSpellID()
-
---Character
-    local plvl                                              = UnitLevel('player');
-    local int                                               = UnitStat("player", 4);
---Racials
+--Info
+local _Player_Level = UnitLevel("player");
+local _Player_Percent_Health = ConROC:PercentHealth('player');
+local _is_PvP = ConROC:IsPvP();
+local _in_combat = UnitAffectingCombat('player');
+local _party_size = GetNumGroupMembers();
+local _is_PC = UnitPlayerControlled("target");
+local _is_Enemy = ConROC:TarHostile();
+local _Target_Health = UnitHealth('target');
+local _Target_Percent_Health = ConROC:PercentHealth('target');
 
 --Resources
-    local mana                                              = UnitPower('player', Enum.PowerType.Mana);
-    local manaMax                                           = UnitPowerMax('player', Enum.PowerType.Mana);
-    local manaBase                                          = manaMax - (math.min(20,int)+15*(int-math.min(20,int)))
-    local rage                                              = UnitPower('player', Enum.PowerType.Rage);
-    local rageMax                                           = UnitPowerMax('player', Enum.PowerType.Rage);
-    local energy                                            = UnitPower('player', Enum.PowerType.Energy);
-    local energyMax                                         = UnitPowerMax('player', Enum.PowerType.Energy);
-    local energyPercent                                     = math.max(0, energy) / math.max(1, energyMax) * 100;   
-    local combo                                             = UnitPower('player', Enum.PowerType.ComboPoints);
-    local comboMax                                          = UnitPowerMax('player', Enum.PowerType.ComboPoints);
-
---Abilities
-    local fFireRDY                                         = ConROC:AbilityReady(_FaerieFire, timeShift);
-        local fFireDEBUFF                                       = ConROC:DebuffName(_FaerieFire, timeShift);        
-    local hiberRDY                                          = ConROC:AbilityReady(_Hibernate, timeShift);
-    local hurrRDY                                           = ConROC:AbilityReady(_Hurricane, timeShift);
-    local mfireRDY                                          = ConROC:AbilityReady(_Moonfire, timeShift);
-        local mfireDEBUFF                                       = ConROC:TargetDebuff(_Moonfire, timeShift);    
-    local mFormRDY                                          = ConROC:AbilityReady(Bal_Ability.MoonkinForm, timeShift);
-        local mFormBUFF                                         = ConROC:Form(Bal_Ability.MoonkinForm, timeShift);      
-    local sootheRDY                                         = ConROC:AbilityReady(_SootheAnimal, timeShift);
-    local sfireRDY                                          = ConROC:AbilityReady(_Starfire, timeShift);
-    local wrathRDY                                          = ConROC:AbilityReady(_Wrath, timeShift);
-    
-    local bashRDY                                           = ConROC:AbilityReady(_Bash, timeShift);
-    local bFormRDY                                          = ConROC:AbilityReady(_BearForm, timeShift);
-        local bFormBUFF                                         = ConROC:Form(_BearForm);   
-    local cFormRDY                                          = ConROC:AbilityReady(Feral_Ability.CatForm, timeShift);
-        local cFormBUFF                                         = ConROC:Form(Feral_Ability.CatForm);   
-    local cRoarRDY                                          = ConROC:AbilityReady(Feral_Ability.ChallengingRoar, timeShift);
-    local clawRDY                                           = ConROC:AbilityReady(_Claw, timeShift);
-    local dashRDY                                           = ConROC:AbilityReady(_Dash, timeShift);
-    local enrageRDY                                         = ConROC:AbilityReady(Feral_Ability.Enrage, timeShift);
-    local ffFeralRDY                                        = ConROC:AbilityReady(_FaerieFireFeral, timeShift);
-        local ffFeralDEBUFF                                     = ConROC:DebuffName(_FaerieFireFeral, timeShift);   
-    local fChargeRDY                                        = ConROC:AbilityReady(_FeralCharge, timeShift);
-    local fBiteRDY                                          = ConROC:AbilityReady(_FerociousBite, timeShift);
-    local maulRDY                                           = ConROC:AbilityReady(_Maul, timeShift);
-    local pounceRDY                                         = ConROC:AbilityReady(_Pounce, timeShift);
-    local prowlRDY                                          = ConROC:AbilityReady(_Prowl, timeShift);
-    local rakeRDY                                           = ConROC:AbilityReady(_Rake, timeShift);
-        local rakeDEBUFF                                        = ConROC:TargetDebuff(_Rake, timeShift);        
-    local ravageRDY                                         = ConROC:AbilityReady(_Ravage, timeShift);
-    local ripRDY                                            = ConROC:AbilityReady(_Rip, timeShift);
-        local ripDEBUFF                                         = ConROC:TargetDebuff(_Rip, timeShift); 
-    local shredRDY                                          = ConROC:AbilityReady(_Shred, timeShift);
-    local swipeRDY                                          = ConROC:AbilityReady(_Swipe, timeShift);
-    local tFuryRDY                                          = ConROC:AbilityReady(_TigersFury, timeShift);
-        local tFuryBUFF                                         = ConROC:Buff(_TigersFury, timeShift);      
-    local trackHRDY                                         = ConROC:AbilityReady(Feral_Ability.TrackHumanoid, timeShift);
-    local tFormRDY                                          = ConROC:AbilityReady(Feral_Ability.TravelForm, timeShift);
-        local tFormBUFF                                         = ConROC:Form(Feral_Ability.TravelForm);    
-    
-    local hTouchRDY                                         = ConROC:AbilityReady(_HealingTouch, timeShift);
-    local innerRDY                                          = ConROC:AbilityReady(Resto_Ability.Innervate, timeShift);
-    local iSwarmRDY                                         = ConROC:AbilityReady(_InsectSwarm, timeShift);
-        local iSwarmDEBUFF                                      = ConROC:TargetDebuff(_InsectSwarm, timeShift); 
-    local moftwRDY                                          = ConROC:AbilityReady(_MarkoftheWild, timeShift);
-        local moftwBUFF                                         = ConROC:Buff(_MarkoftheWild, timeShift);   
-    local nSwiftRDY                                         = ConROC:AbilityReady(Resto_Ability.NaturesSwiftness, timeShift);
-    local rebirthRDY                                        = ConROC:AbilityReady(_Rebirth, timeShift);
-    local regrowthRDY                                       = ConROC:AbilityReady(_Regrowth, timeShift);
-        local regrowthBUFF                                      = ConROC:Buff(_Regrowth, timeShift);    
-    local rejuvRDY                                          = ConROC:AbilityReady(_Rejuvenation, timeShift);
-        local rejuvBUFF                                         = ConROC:Buff(_Rejuvenation, timeShift);    
-    local sMendRDY                                          = ConROC:AbilityReady(Resto_Ability.Swiftmend, timeShift);
-    local tranqRDY                                          = ConROC:AbilityReady(_Tranquility, timeShift);
-
-    local clearCastingBUFF                                  = ConROC:BuffName(ids.Player_Buff.clearCasting, timeShift);
---runes
-    local rLacerateRDY                                      = ConROC:AbilityReady(_RuneLacerate, timeShift);
-        local rLacerateDEBUFF, rLacerateCount, rLacerateDUR = ConROC:TargetDebuff(_RuneLacerate, timeShift);
-        local rLacerateDEBUFF2                                   = ConROC:DebuffName(_RuneLacerate, timeShift);  
-    local rBearMangleRDY                                    = ConROC:AbilityReady(_RuneBearMangle, timeShift);
-        local rBearMangleDEBUFF, _, rBearMangleDUR              = ConROC:TargetDebuff(_RuneBearMangle, timeShift);
-        rBearMangleDUR = rBearMangleDUR or 0;
-    local rCatMangleRDY                                     = ConROC:AbilityReady(_RuneCatMangle, timeShift);
-        local rCatMangleDEBUFF, _, rCatMangleDUR               = ConROC:TargetDebuff(_RuneCatMangle, timeShift);
-        rCatMangleDUR = rCatMangleDUR or 0;
-   local rSunfireRDY                                       = ConROC:AbilityReady(_RuneSunfire, timeShift);
-        local rSunfireDEBUFF                                    = ConROC:TargetDebuff(_RuneSunfire, timeShift);
-    local rStarSurgeRDY                                     = ConROC:AbilityReady(_RuneStarSurge, timeShift);
-    local rsRoarRDY                                         = ConROC:AbilityReady(_RuneSavageRoar, timeShift);
-        local rsRoarBUFF, rsRoarDUR                             = ConROC:BuffName(ids.Player_Buff.SavageRoar, timeShift);
-    local sBashRDY                                             = ConROC:AbilityReady(_SkullBash, timeShift);
+local _Combo, _Combo_Max = ConROC:PlayerPower('Combo');
+local _Energy, _Energy_Max = ConROC:PlayerPower('Energy');
+local _Mana, _Mana_Max, _Mana_Percent = ConROC:PlayerPower('Mana');
+local _Rage, _Rage_Max = ConROC:PlayerPower('Rage');
 
 --Conditions
-    local incombat                                          = UnitAffectingCombat('player');
-    local stealthed                                         = IsStealthed();
-    local resting = IsResting()
-    local mounted = IsMounted()
-    local targetPh                                          = ConROC:PercentHealth('target');   
-    local moving                                            = ConROC:PlayerSpeed();
-    local inMelee                                           = ConROC:IsMeleeRange()--CheckInteractDistance("target", 3);
-    local isEnemy                                           = ConROC:TarHostile();
-    local tarInMelee                                        = 0;
-    
-    if plvl >= 10 and IsSpellKnown(Feral_Ability.Growl) then
-        tarInMelee = ConROC:Targets(Feral_Ability.Growl);   
-    elseif plvl >= 20 and IsSpellKnown(_Claw) then
+local _Queue = 0;
+local _is_moving = ConROC:PlayerSpeed();
+--local _enemies_in_melee, _target_in_melee = ConROC:Targets("Melee");
+--local _enemies_in_10yrds, _target_in_10yrds = ConROC:Targets("10");
+--local _enemies_in_25yrds, _target_in_25yrds = ConROC:Targets("25");
+--local _enemies_in_40yrds, _target_in_40yrds = ConROC:Targets("40");
+local _can_Execute = _Target_Percent_Health < 20;
+
+--Racials
+local _Berserking, _Berserking_RDY = _, _;
+
+function ConROC:Stats()
+	_Player_Level = UnitLevel("player");
+	_Player_Percent_Health = ConROC:PercentHealth('player');
+	_is_PvP = ConROC:IsPvP();
+	_in_combat = UnitAffectingCombat('player');
+	_party_size = GetNumGroupMembers();
+	_is_PC = UnitPlayerControlled("target");
+	_is_Enemy = ConROC:TarHostile();
+	_Target_Health = UnitHealth('target');
+	_Target_Percent_Health = ConROC:PercentHealth('target');
+
+	_Combo, _Combo_Max = ConROC:PlayerPower('Combo');
+	_Energy, _Energy_Max = ConROC:PlayerPower('Energy');
+	_Mana, _Mana_Max, _Mana_Percent = ConROC:PlayerPower('Mana');
+	_Rage, _Rage_Max = ConROC:PlayerPower('Rage');
+
+	_Queue = 0;
+	_is_moving = ConROC:PlayerSpeed();
+--	_enemies_in_melee, _target_in_melee = ConRO:Targets("Melee");
+--	_enemies_in_10yrds, _target_in_10yrds = ConRO:Targets("10");
+--	_enemies_in_25yrds, _target_in_25yrds = ConRO:Targets("25");
+--	_enemies_in_40yrds, _target_in_40yrds = ConRO:Targets("40");
+	_can_Execute = _Target_Percent_Health < 20;
+end
+
+function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
+    ConROC:UpdateSpellID();
+	ConROC:Stats();
+
+--Character
+    local int                                               = UnitStat("player", 4);
+
+--Resources
+    local manaBase                                          = _Mana_Max - (math.min(20,int)+15*(int-math.min(20,int)))
+
+--Abilities
+    local _FaerieFire, _FaerieFire_RDY = ConROC:AbilityReady(Ability.FaerieFire, timeShift);
+        local _, _, _, _FaerieFire_UP = ConROC:TargetAura(_FaerieFire, timeShift);
+    local _Hurricane, _Hurricane_RDY = ConROC:AbilityReady(Ability.Hurricane, timeShift);
+    local _Moonfire, _Moonfire_RDY = ConROC:AbilityReady(Ability.Moonfire, timeShift);
+        local _Moonfire_RDY = ConROC:TargetAura(_Moonfire, timeShift);
+    local _MoonkinForm, _MoonkinForm_RDY = ConROC:AbilityReady(Ability.MoonkinForm, timeShift);
+        local _MoonkinForm_FORM = ConROC:Form(_MoonkinForm);
+    local _SootheAnimal, _SootheAnimal_RDY = ConROC:AbilityReady(Ability.SootheAnimal, timeShift);
+    local _Starfire, _Starfire_RDY = ConROC:AbilityReady(Ability.Starfire, timeShift);
+    local _Wrath, _Wrath_RDY = ConROC:AbilityReady(Ability.Wrath, timeShift);
+
+    local _Bash, _Bash_RDY = ConROC:AbilityReady(Ability.Bash, timeShift);
+    local _BearForm, _BearForm_RDY = ConROC:AbilityReady(Ability.BearForm, timeShift);
+        local _BearForm_FORM = ConROC:Form(_BearForm);
+    local _CatForm, _CatForm_RDY = ConROC:AbilityReady(Ability.CatForm, timeShift);
+        local _CatForm_FORM = ConROC:Form(_CatForm);
+    local _ChallengingRoar, _ChallengingRoar_RDY = ConROC:AbilityReady(Ability.ChallengingRoar, timeShift);
+    local _Claw, _Claw_RDY = ConROC:AbilityReady(Ability.Claw, timeShift);
+    local _Dash, _Dash_RDY = ConROC:AbilityReady(Ability.Dash, timeShift);
+    local _Enrage, _Enrage_RDY = ConROC:AbilityReady(Ability.Enrage, timeShift);
+    local _FaerieFireFeral, _FaerieFireFeral_RDY = ConROC:AbilityReady(Ability.FaerieFireFeral, timeShift);
+        local _, _, _, _FaerieFireFeral_UP = ConROC:TargetAura(_FaerieFireFeral, timeShift);
+    local _FeralCharge, _FeralCharge_RDY = ConROC:AbilityReady(Ability.FeralCharge, timeShift);
+    local _FerociousBite, _FerociousBite_RDY = ConROC:AbilityReady(Ability.FerociousBite, timeShift);
+    local _Maul, _Maul_RDY = ConROC:AbilityReady(Ability.Maul, timeShift);
+    local _Pounce, _Pounce_RDY = ConROC:AbilityReady(Ability.Pounce, timeShift);
+    local _Prowl, _Prowl_RDY = ConROC:AbilityReady(Ability.Prowl, timeShift);
+    local _Rake, _Rake_RDY = ConROC:AbilityReady(Ability.Rake, timeShift);
+        local _Rake_DEBUFF = ConROC:TargetAura(_Rake, timeShift);
+    local _Ravage, _Ravage_RDY = ConROC:AbilityReady(Ability.Ravage, timeShift);
+    local _Rip, _Rip_RDY = ConROC:AbilityReady(Ability.Rip, timeShift);
+        local _Rip_DEBUFF = ConROC:TargetAura(_Rip, timeShift);
+    local _Shred, _Shred_RDY = ConROC:AbilityReady(Ability.Shred, timeShift);
+    local _Swipe, _Swipe_RDY = ConROC:AbilityReady(Ability.Swipe, timeShift);
+    local _TigersFury, _TigersFury_RDY = ConROC:AbilityReady(Ability.TigersFury, timeShift);
+        local _TigersFury_BUFF = ConROC:Aura(_TigersFury, timeShift);
+
+    local _Innervate, _Innervate_RDY = ConROC:AbilityReady(Ability.Innervate, timeShift);
+    local _InsectSwarm, _InsectSwarm_RDY = ConROC:AbilityReady(Ability.InsectSwarm, timeShift);
+        local _InsectSwarm_DEBUFF = ConROC:TargetAura(_InsectSwarm, timeShift);
+    local _MarkoftheWild, _MarkoftheWild_RDY = ConROC:AbilityReady(Ability.MarkoftheWild, timeShift);
+        local _MarkoftheWild_BUFF = ConROC:Aura(_MarkoftheWild, timeShift);
+    local _NaturesSwiftness, _NaturesSwiftness_RDY = ConROC:AbilityReady(Ability.NaturesSwiftness, timeShift);
+
+    local _, _, _, _ClearCasting_UP = ConROC:Aura(Buff.ClearCasting, timeShift);
+
+--Runes
+    local _Lacerate, _Lacerate_RDY = ConROC:AbilityReady(Runes.Lacerate, timeShift);
+        local _, _Lacerate_COUNT, _Lacerate_DUR = ConROC:TargetAura(_Lacerate, timeShift);
+    local _MangleBear, _MangleBear_RDY = ConROC:AbilityReady(Runes.MangleBear, timeShift);
+        local _MangleBear_DEBUFF, _, _MangleBear_DUR = ConROC:TargetAura(_MangleBear, timeShift);
+        _MangleBear_DUR = _MangleBear_DUR or 0;
+    local _MangleCat, _MangleCat_RDY = ConROC:AbilityReady(Runes.MangleCat, timeShift);
+        local _, _, _MangleCat_DUR = ConROC:TargetAura(_MangleCat, timeShift);
+        _MangleCat_DUR = _MangleCat_DUR or 0;
+    local _Sunfire, _Sunfire_RDY = ConROC:AbilityReady(Runes.Sunfire, timeShift);
+        local _Sunfire_DEBUFF = ConROC:TargetAura(_Sunfire, timeShift);
+    local _StarSurge, _StarSurge_RDY = ConROC:AbilityReady(Runes.StarSurge, timeShift);
+    local _SavageRoar, _SavageRoar_RDY = ConROC:AbilityReady(Runes.SavageRoar, timeShift);
+        local _, _, _SavageRoar_DUR, _SavageRoar_UP = ConROC:Aura(_SavageRoar, timeShift);
+    local _SkullBash, _SkullBash_RDY = ConROC:AbilityReady(Runes.SkullBash, timeShift);
+
+--Conditions
+    local _is_stealthed = IsStealthed();
+    local tarInMelee = 0;
+
+    if _Player_Level >= 10 and IsSpellKnown(Feral_Ability.Growl) then
+        tarInMelee = ConROC:Targets(Feral_Ability.Growl);
+    elseif _Player_Level >= 20 and IsSpellKnown(_Claw) then
         tarInMelee = ConROC:Targets(_Claw);
     end
-    
-    local bearCost = 0;
-    local maulCost = 15;
-    local swipeCost = 20;
-    
-    local catCost = manaBase * (.55 * (1.0 - (.1 * select(2, ConROC:TalentChosen(Spec.Balance, Bal_Talent.NaturalShapeshifter)))))
-    local rakeCost = 40;
-    local clawCost = 45;
-    local shredCost = 60;
 
-        
+    local _Maul_COST = 15;
+    local _Swipe_COST = 20;
+
+    local _CatForm_COST = manaBase * (.55 * (1.0 - (.1 * select(2, ConROC:TalentChosen(Spec.Balance, Bal_Talent.NaturalShapeshifter)))))
+    local _Rake_COST = 40;
+    local _Claw_COST = 45;
+    local _Shred_COST = 60;
+
     if ConROC:TalentChosen(Spec.Feral, Feral_Talent.Ferocity) then
         ferocityBonus = select(2, ConROC:TalentChosen(Spec.Feral, Feral_Talent.Ferocity));
-        
-        maulCost = maulCost - ferocityBonus;
-        swipeCost = swipeCost - ferocityBonus;
-        rakeCost = rakeCost - ferocityBonus;
-        clawCost = clawCost - ferocityBonus;
+
+        _Maul_COST = _Maul_COST - ferocityBonus;
+        _Swipe_COST = _Swipe_COST - ferocityBonus;
+        _Rake_COST = _Rake_COST - ferocityBonus;
+        _Claw_COST = _Claw_COST - ferocityBonus;
     end
-    
+
     if ConROC:TalentChosen(Spec.Feral, Feral_Talent.ImprovedShred) then
         shredBonus = select(2, ConROC:TalentChosen(Spec.Feral, Feral_Talent.ImprovedShred));
-        
-        shredCost = shredCost - (shredBonus * 6);
+
+        _Shred_COST = _Shred_COST - (shredBonus * 6);
     end
-    
-    
+
     ConROCPowerShift:Hide();
-    
+
+--Warnings
+
 --Indicators
-    ConROC:AbilityRaidBuffs(_MarkoftheWild, moftwRDY and not moftwBUFF);
-    ConROC:AbilityInterrupt(_SkullBash, ConROC:Interrupt() and sBashRDY)
-    
+    ConROC:AbilityRaidBuffs(_MarkoftheWild, _MarkoftheWild_RDY and not _MarkoftheWild_BUFF);
+    ConROC:AbilityInterrupt(_SkullBash, ConROC:Interrupt() and _SkullBash_RDY)
+
 --Rotations
---print("currentSpecName", currentSpecName);
-    if ConROC.Seasons.IsSoD then
-        if stealthed and cFormBUFF then
-            if tFuryRDY and not tFuryBUFF and energy >= 80 then
+    --[[if ConROC.Seasons.IsSoD then
+        if _is_stealthed and _CatForm_FORM then
+            if _TigersFury_RDY and not _TigersFury_BUFF and _Energy >= 80 then
                 return _TigersFury;
             end
             
-            if ravageRDY and combo < comboMax and not ConROC:TarYou() then
+            if _Ravage_RDY and _Combo < _Combo_Max and not ConROC:TarYou() then
                 return _Ravage;
             end
             
-            if shredRDY and combo < comboMax and not ConROC:TarYou() then
-                --[[if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and catCost <= mana and energy - shredCost <= 8 then
-                    ConROCPowerShift:Show(); --Shred cost is 60 and powershift now reset you at 40 energy
-                end]]
+            if _Shred_RDY and _Combo < _Combo_Max and not ConROC:TarYou() then
+            --  if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy - _Shred_COST <= 8 then
+            --     ConROCPowerShift:Show(); --Shred cost is 60 and powershift now reset you at 40 energy
+            --  end
                 return _Shred;
             end
         end
         
-        if cFormBUFF then
-            --[[
-            if sRoarRDY and combo >= 1 then
-                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and catCost <= mana and energy - 35 <= 8 then
-                    ConROCPowerShift:Show();
-                end
-                return _FerociousBite;
-            end
-            ]]--
-            if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and catCost <= mana and energy <= 8 then
+        if _CatForm_FORM then
+        --    if sRoarRDY and _Combo >= 1 then
+        --        if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy - 35 <= 8 then
+        --            ConROCPowerShift:Show();
+        --        end
+        --        return _FerociousBite;
+        --    end
+            
+            if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy <= 8 then
                     ConROCPowerShift:Show();
             end
             
-            if tFuryRDY and not tFuryBUFF and energy >= 80 and not incombat then
+            if _TigersFury_RDY and not _TigersFury_BUFF and _Energy >= 80 and not _in_combat then
                 return _TigersFury;
             end
-            if ffFeralRDY and not (fFireDEBUFF or ffFeralDEBUFF) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFireFeral) then
+            if _FaerieFireFeral_RDY and not (_FaerieFire_UP or _FaerieFireFeral_UP) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFireFeral) then
                 return _FaerieFireFeral;
             end
-            if clearCastingBUFF and shredRDY and not ConROC:TarYou() then
+            if _ClearCasting_UP and _Shred_RDY and not ConROC:TarYou() then
                 return _Shred;
             end
-            if rCatMangleRDY and combo < 1 and rCatMangleDUR <= 1.2 then
-                return _RuneCatMangle;
+            if _MangleCat_RDY and _Combo < 1 and _MangleCat_DUR <= 1.2 then
+                return _MangleCat;
             end
             
-            if rsRoarRDY and combo > 1 and (not rsRoarBUFF or rsRoarDUR < 2) then
+            if _SavageRoar_RDY and _Combo > 1 and (not _SavageRoar_UP or _SavageRoar_DUR < 2) then
                 return _RuneSavageRoar;
             end
             
-            if rCatMangleRDY and combo ~= comboMax and rCatMangleDUR <= 1.2 then
-                return _RuneCatMangle;
+            if _MangleCat_RDY and _Combo ~= _Combo_Max and _MangleCat_DUR <= 1.2 then
+                return _MangleCat;
             end
 
-            if ripRDY and not ripDEBUFF and rsRoarBUFF and combo == comboMax and ConROC:CheckBox(ConROC_SM_DoT_Rip) then --and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
+            if _Rip_RDY and not _Rip_DEBUFF and _SavageRoar_UP and _Combo == _Combo_Max and ConROC:CheckBox(ConROC_SM_DoT_Rip) then --and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
                 return _Rip;
             end --Not good output unless player wants chosen in SpellMenu
             
-            --[[
-            if fBiteRDY and combo == comboMax then
-                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and catCost <= mana and energy - 35 <= 8 then
-                    ConROCPowerShift:Show();
-                end
-                return _FerociousBite;
-            end
-            ]]--
-            if rakeRDY and not rakeDEBUFF and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
+        --   if _FerociousBite_RDY and _Combo == _Combo_Max then
+        --        if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy - 35 <= 8 then
+        --            ConROCPowerShift:Show();
+        --        end
+        --        return _FerociousBite;
+        --    end
+
+            if _Rake_RDY and not _Rake_DEBUFF and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
                 
                 return _Rake;
             end
-            if rCatMangleRDY then
-                return _RuneCatMangle;
+            if _MangleCat_RDY then
+                return _MangleCat;
             end
-            if not IsSpellKnownOrOverridesKnown(_RuneCatMangle) then
-                if clawRDY and combo < comboMax and (not IsSpellKnown(_Shred) or ConROC:TarYou()) then
+            if not IsSpellKnownOrOverridesKnown(_MangleCat) then
+                if _Claw_RDY and _Combo < _Combo_Max and (not IsSpellKnown(_Shred) or ConROC:TarYou()) then
                     return _Claw;
                 end
             end
             return nil
         end
 
-        if bFormBUFF then
+        if _BearForm_FORM then
             --print("You are in Bear form!")
-            if ffFeralRDY and not (fFireDEBUFF or ffFeralDEBUFF) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFireFeral) then
+            if _FaerieFireFeral_RDY and not (_FaerieFire_UP or _FaerieFireFeral_UP) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFireFeral) then
                 return _FaerieFireFeral;
             end
 
-            if rLacerateRDY and rLacerateCount == 5 and rLacerateDUR <=1.5 then
+            if _Lacerate_RDY and _Lacerate_COUNT == 5 and _Lacerate_DUR <=1.5 then
                 return _RuneLacerate;
             end
-            if rBearMangleRDY and not rBearMangleDEBUFF and rBearMangleDUR <= 1.2 then
+            if _MangleBear_RDY and not _MangleBear_DEBUFF and _MangleBear_DUR <= 1.2 then
                 return _RuneBearMangle;
             end
-            if rLacerateRDY and (rLacerateCount < 5 and rLacerateDUR <= 8) and rage >= 15 then
+            if _Lacerate_RDY and (_Lacerate_COUNT < 5 and _Lacerate_DUR <= 8) and _Rage >= 15 then
                 return _RuneLacerate;
             end
-            if swipeRDY and (rage >= rageMax - 40 or tarInMelee >= 3) then
+            if _Swipe_RDY and (_Rage >= _Rage_Max - 40 or tarInMelee >= 3) then
                 return _Swipe;
             end
-            --ConROC:AbilityTaunt(_Maul, maulRDY);
-            if maulRDY then
+            --ConROC:AbilityTaunt(_Maul, _Maul_RDY);
+            if _Maul_RDY then
                 return _Maul;
             end
             return nil;
@@ -596,138 +325,135 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
 
     --elseif currentSpecName == "Balance" then
 
-        if mFormRDY and not mFormBUFF then
+        if _MoonkinForm_RDY and not _MoonkinForm_FORM then
             return Bal_Ability.MoonkinForm;
         end
-        if mFormBUFF then 
-        --[[           
-            if not incombat then
-                if sfireRDY then
-                    return _Starfire;
-                end
-                
-                if wrathRDY then
-                    return _Wrath;
-                end 
-            end
-            if hurrRDY and (tarInMelee >= 4 or ConROC_AoEButton:IsVisible()) then
-                return _Hurricane;
-            end
-            ]]
+        if _MoonkinForm_FORM then        
+        --    if not _in_combat then
+        --        if _Starfire_RDY then
+        --            return _Starfire;
+        --        end
+        --        
+        --        if _Wrath_RDY then
+        --           return _Wrath;
+        --        end 
+        --    end
+        --    if _Hurricane_RDY and (tarInMelee >= 4 or ConROC_AoEButton:IsVisible()) then
+        --        return _Hurricane;
+        --    end
 
-            if rStarSurgeRDY then
+            if _StarSurge_RDY then
                 return _RuneStarSurge;
             end
             
-            if rSunfireRDY and not rSunfireDEBUFF then
+            if _Sunfire_RDY and not _Sunfire_DEBUFF then
                 return _RuneSunfire;
             end
 
-            if mfireRDY and not mfireDEBUFF then
+            if _Moonfire_RDY and not _Moonfire_RDY then
                 return _Moonfire;
             end
---[[
-            if mfireRDY and not mfireDEBUFF and ConROC_AoEButton:IsVisible() then
-                return _Moonfire;
-            end
-]]
-            if fFireRDY and not (fFireDEBUFF or ffFeralDEBUFF) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFire) then
+
+        --    if _Moonfire_RDY and not _Moonfire_RDY and ConROC_AoEButton:IsVisible() then
+        --        return _Moonfire;
+        --    end
+
+            if _FaerieFire_RDY and not (_FaerieFire_UP or _FaerieFireFeral_UP) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFire) then
                 return _FaerieFire;
             end
             
-            if iSwarmRDY and not iSwarmDEBUFF then
+            if _InsectSwarm_RDY and not _InsectSwarm_DEBUFF then
                 return _InsectSwarm
             end
-        --[[
-            if sfireRDY then
-                return _Starfire;
-            end
-]]
-            if wrathRDY then
+
+        --    if _Starfire_RDY then
+        --        return _Starfire;
+        --    end
+
+            if _Wrath_RDY then
                 return _Wrath;
             end
             return nil;
         end
 
-        if isEnemy then
-            if rStarSurgeRDY then
+        if _is_Enemy then
+            if _StarSurge_RDY then
                 return _RuneStarSurge;
             end
 
-            if rSunfireRDY and not rSunfireDEBUFF then
+            if _Sunfire_RDY and not _Sunfire_DEBUFF then
                 return _RuneSunfire;
             end
-            if mfireRDY and not mfireDEBUFF then
+            if _Moonfire_RDY and not _Moonfire_RDY then
                 return _Moonfire;
             end
 
-            if fFireRDY and not (fFireDEBUFF or ffFeralDEBUFF) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFire) then
+            if _FaerieFire_RDY and not (_FaerieFire_UP or _FaerieFireFeral_UP) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFire) then
                 return _FaerieFire;
             end
             
-            if iSwarmRDY and not iSwarmDEBUFF then
+            if _InsectSwarm_RDY and not _InsectSwarm_DEBUFF then
                 return _InsectSwarm
             end
 
-            if wrathRDY then
+            if _Wrath_RDY then
                 return _Wrath;
             end
         end
-    else --not SoD
-
-        if stealthed and cFormBUFF then
-            if tFuryRDY and not tFuryBUFF and energy >= 80 then
+    else --not SoD]]
+        if _is_stealthed and _CatForm_FORM then
+            if _TigersFury_RDY and not _TigersFury_BUFF and _Energy >= 80 then
                 return _TigersFury;
             end
-            
-            if ravageRDY and combo < comboMax and not ConROC:TarYou() then
+
+            if _Ravage_RDY and _Combo < _Combo_Max and not ConROC:TarYou() then
                 return _Ravage;
             end
-            
-            if shredRDY and combo < comboMax and not ConROC:TarYou() then
-                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and catCost <= mana and energy - shredCost <= 8 then
+
+            if _Shred_RDY and _Combo < _Combo_Max and not ConROC:TarYou() then
+                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy - _Shred_COST <= 8 then
                     ConROCPowerShift:Show();
                 end
                 return _Shred;
             end
         end
-        
-        if cFormBUFF then
-            if ffFeralRDY and not (fFireDEBUFF or ffFeralDEBUFF) then
+
+        if _CatForm_FORM then
+            if _FaerieFireFeral_RDY and not (_FaerieFire_UP or _FaerieFireFeral_UP) then
                 return _FaerieFireFeral;
             end
-            
-            if tFuryRDY and not tFuryBUFF and energy >= 80 then
+
+            if _TigersFury_RDY and not _TigersFury_BUFF and _Energy >= 80 then
                 return _TigersFury;
             end
-            
-            if ripRDY and not ripDEBUFF and combo >= 5 and ConROC:CheckBox(ConROC_SM_DoT_Rip) and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
+
+            if _Rip_RDY and not _Rip_DEBUFF and _Combo >= 5 and ConROC:CheckBox(ConROC_SM_DoT_Rip) and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
                 return _Rip;
             end --Not good output unless player wants chosen in SpellMenu
-            
-            if fBiteRDY and combo >= 5 then
-                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and catCost <= mana and energy - 35 <= 8 then
+
+            if _FerociousBite_RDY and _Combo >= 5 then
+                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy - 35 <= 8 then
                     ConROCPowerShift:Show();
                 end
                 return _FerociousBite;
             end
-            
-            if rakeRDY and not rakeDEBUFF and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
-                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and catCost <= mana and energy - rakeCost <= 8 then
+
+            if _Rake_RDY and not _Rake_DEBUFF and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
+                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy - _Rake_COST <= 8 then
                     ConROCPowerShift:Show();
                 end
                 return _Rake;
             end
-            
-            if shredRDY and combo < comboMax and not ConROC:TarYou() then
-                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and catCost <= mana and energy - shredCost <= 8 then
+
+            if _Shred_RDY and _Combo < _Combo_Max and not ConROC:TarYou() then
+                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy - _Shred_COST <= 8 then
                     ConROCPowerShift:Show();
                 end
                 return _Shred;
             end
 
-            if clawRDY and combo < comboMax and (not IsSpellKnown(_Shred) or ConROC:TarYou()) then
-                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and catCost <= mana and energy - clawCost <= 8 then
+            if _Claw_RDY and _Combo < _Combo_Max and (not IsSpellKnown(_Shred) or ConROC:TarYou()) then
+                if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy - _Claw_COST <= 8 then
                     ConROCPowerShift:Show();
                 end
                 return _Claw;
@@ -735,225 +461,160 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
             return nil
         end
 
-        if bFormBUFF then
+        if _BearForm_FORM then
             --print("You are in Bear form!")
-            if ffFeralRDY and not (fFireDEBUFF or ffFeralDEBUFF) then
+            if _FaerieFireFeral_RDY and not (_FaerieFire_UP or _FaerieFireFeral_UP) then
                 return _FaerieFireFeral;
             end
 
-            if rLacerateRDY and rLacerateCount == 5 and rLacerateDUR <=1.5 then
-                return _RuneLacerate;
-            end
-            if rMangleRDY and rMangleDUR <= 1.2 then
-                return _RuneMangle;
-            end
-            if rLacerateRDY and (rLacerateCount < 5 and rLacerateDUR <= 8) and rMangleDUR >= 2 and rage >= 15 then
-                return _RuneLacerate;
-            end
-            --ConROC:AbilityTaunt(_Maul, maulRDY);
-            if maulRDY then
+            if _Maul_RDY then
                 return _Maul;
             end
-            if swipeRDY and (rage >= rageMax - 40 or tarInMelee >= 3) then
+
+            if _Swipe_RDY and (_Rage >= _Rage_Max - 40 or tarInMelee >= 3) then
                 return _Swipe;
             end
+
             return nil;
         end
 
-    --elseif currentSpecName == "Balance" then
-
-        if mFormRDY and not mFormBUFF then
-            return Bal_Ability.MoonkinForm;
+        if _MoonkinForm_RDY and not _MoonkinForm_FORM then
+            return _MoonkinForm;
         end
-        if mFormBUFF then            
-            if not incombat then
-                if sfireRDY then
+
+        if _MoonkinForm_FORM then
+            if not _in_combat then
+                if _Starfire_RDY then
                     return _Starfire;
                 end
-                
-                if wrathRDY then
+
+                if _Wrath_RDY then
                     return _Wrath;
-                end 
+                end
             end
-            
-            if hurrRDY and (tarInMelee >= 4 or ConROC_AoEButton:IsVisible()) then
+
+            if _Hurricane_RDY and (tarInMelee >= 4 or ConROC_AoEButton:IsVisible()) then
                 return _Hurricane;
             end
 
-            if mfireRDY and not mfireDEBUFF and ConROC_AoEButton:IsVisible() then
+            if _Moonfire_RDY and not _Moonfire_RDY and ConROC_AoEButton:IsVisible() then
                 return _Moonfire;
             end
 
-            if fFireRDY and not (fFireDEBUFF or ffFeralDEBUFF) then
+            if _FaerieFire_RDY and not (_FaerieFire_UP or _FaerieFireFeral_UP) then
                 return _FaerieFire;
             end
-            
-            if iSwarmRDY and not iSwarmDEBUFF then
+
+            if _InsectSwarm_RDY and not _InsectSwarm_DEBUFF then
                 return _InsectSwarm
             end
 
-            if mfireRDY and not mfireDEBUFF then
+            if _Moonfire_RDY and not _Moonfire_RDY then
                 return _Moonfire;
             end
-        
-            if sfireRDY then
+
+            if _Starfire_RDY then
                 return _Starfire;
             end
 
-            if wrathRDY then
+            if _Wrath_RDY then
                 return _Wrath;
             end
             return nil;
         end
 
-        if isEnemy then
-            if fFireRDY and not (fFireDEBUFF or ffFeralDEBUFF) then
+        if _is_Enemy then
+            if _FaerieFire_RDY and not (_FaerieFire_UP or _FaerieFireFeral_UP) then
                 return _FaerieFire;
             end
-            
-            if iSwarmRDY and not iSwarmDEBUFF then
+
+            if _InsectSwarm_RDY and not _InsectSwarm_DEBUFF then
                 return _InsectSwarm
             end
 
-            if rSunfireRDY and not rSunfireDEBUFF then
-                return _RuneSunfire;
-            end
-            if mfireRDY and not mfireDEBUFF then
+            if _Moonfire_RDY and not _Moonfire_RDY then
                 return _Moonfire;
             end
 
-            if wrathRDY then
+            if _Wrath_RDY then
                 return _Wrath;
             end
         end
-    end
+    --end
     return nil;
 end
 
 function ConROC.Druid.Defense(_, timeShift, currentSpell, gcd)
---Character
-    local plvl                                              = UnitLevel('player');
-    
---Racials
-
---Resources
-    local mana                                              = UnitPower('player', Enum.PowerType.Mana);
-    local manaMax                                           = UnitPowerMax('player', Enum.PowerType.Mana);
-    local rage                                              = UnitPower('player', Enum.PowerType.Rage);
-    local rageMax                                           = UnitPowerMax('player', Enum.PowerType.Rage);
-    local energy                                            = UnitPower('player', Enum.PowerType.Energy);
-    local energyMax                                         = UnitPowerMax('player', Enum.PowerType.Energy);
-    local energyPercent                                     = math.max(0, energy) / math.max(1, energyMax) * 100;   
-    local combo                                             = UnitPower('player', Enum.PowerType.ComboPoints);
-    local comboMax                                          = UnitPowerMax('player', Enum.PowerType.ComboPoints);
-    
---Ranks
-    if IsSpellKnown(ids.Bal_Ability.EntanglingRootsRank6) then _EntanglingRoots = ids.Bal_Ability.EntanglingRootsRank6;
-    elseif IsSpellKnown(ids.Bal_Ability.EntanglingRootsRank5) then _EntanglingRoots = ids.Bal_Ability.EntanglingRootsRank5;
-    elseif IsSpellKnown(ids.Bal_Ability.EntanglingRootsRank4) then _EntanglingRoots = ids.Bal_Ability.EntanglingRootsRank4;
-    elseif IsSpellKnown(ids.Bal_Ability.EntanglingRootsRank3) then _EntanglingRoots = ids.Bal_Ability.EntanglingRootsRank3;
-    elseif IsSpellKnown(ids.Bal_Ability.EntanglingRootsRank2) then _EntanglingRoots = ids.Bal_Ability.EntanglingRootsRank2; end
-
-    if IsSpellKnown(ids.Bal_Ability.NaturesGraspRank6) then _NaturesGrasp = ids.Bal_Ability.NaturesGraspRank6;
-    elseif IsSpellKnown(ids.Bal_Ability.NaturesGraspRank5) then _NaturesGrasp = ids.Bal_Ability.NaturesGraspRank5;
-    elseif IsSpellKnown(ids.Bal_Ability.NaturesGraspRank4) then _NaturesGrasp = ids.Bal_Ability.NaturesGraspRank4;
-    elseif IsSpellKnown(ids.Bal_Ability.NaturesGraspRank3) then _NaturesGrasp = ids.Bal_Ability.NaturesGraspRank3;
-    elseif IsSpellKnown(ids.Bal_Ability.NaturesGraspRank2) then _NaturesGrasp = ids.Bal_Ability.NaturesGraspRank2; end
-    
-    if IsSpellKnown(ids.Bal_Ability.ThornsRank6) then _Thorns = ids.Bal_Ability.ThornsRank6;
-    elseif IsSpellKnown(ids.Bal_Ability.ThornsRank5) then _Thorns = ids.Bal_Ability.ThornsRank5;
-    elseif IsSpellKnown(ids.Bal_Ability.ThornsRank4) then _Thorns = ids.Bal_Ability.ThornsRank4;
-    elseif IsSpellKnown(ids.Bal_Ability.ThornsRank3) then _Thorns = ids.Bal_Ability.ThornsRank3;
-    elseif IsSpellKnown(ids.Bal_Ability.ThornsRank2) then _Thorns = ids.Bal_Ability.ThornsRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.CowerRank3) then _Cower = ids.Feral_Ability.CowerRank3; 
-    elseif IsSpellKnown(ids.Feral_Ability.CowerRank2) then _Cower = ids.Feral_Ability.CowerRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.DemoralizingRoarRank5) then _DemoralizingRoar = ids.Feral_Ability.DemoralizingRoarRank5;
-    elseif IsSpellKnown(ids.Feral_Ability.DemoralizingRoarRank4) then _DemoralizingRoar = ids.Feral_Ability.DemoralizingRoarRank4;
-    elseif IsSpellKnown(ids.Feral_Ability.DemoralizingRoarRank3) then _DemoralizingRoar = ids.Feral_Ability.DemoralizingRoarRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.DemoralizingRoarRank2) then _DemoralizingRoar = ids.Feral_Ability.DemoralizingRoarRank2; end
-    
-    if IsSpellKnown(ids.Feral_Ability.FrenziedRegenerationRank3) then _FrenziedRegeneration = ids.Feral_Ability.FrenziedRegenerationRank3;
-    elseif IsSpellKnown(ids.Feral_Ability.FrenziedRegenerationRank2) then _FrenziedRegeneration = ids.Feral_Ability.FrenziedRegenerationRank2; end
+	ConROC:UpdateSpellID();
+	ConROC:Stats();
 
 --Abilities 
-    local bskinRDY                                          = ConROC:AbilityReady(Bal_Ability.Barkskin, timeShift);
-    local eRootsRDY                                         = ConROC:AbilityReady(_EntanglingRoots, timeShift);
-        local eRootsDebuff                                      = ConROC:TargetDebuff(_EntanglingRoots, timeShift);
-    local nGraspRDY                                         = ConROC:AbilityReady(_NaturesGrasp, timeShift);
-        local nGraspBUFF                                        = ConROC:Buff(_NaturesGrasp, timeShift);
-    local oofcRDY                                           = ConROC:AbilityReady(Bal_Ability.OmenofClarity, timeShift);
-        local oofcBUFF                                          = ConROC:Buff(Bal_Ability.OmenofClarity, timeShift);        
-    local thornsRDY                                         = ConROC:AbilityReady(_Thorns, timeShift);
-        local thornsBUFF                                        = ConROC:Buff(_Thorns, timeShift);
+    local _Barkskin, _Barkskin_RDY = ConROC:AbilityReady(Ability.Barkskin, timeShift);
+    local _NaturesGrasp, _NaturesGrasp_RDY = ConROC:AbilityReady(Ability.NaturesGrasp, timeShift);
+        local _NaturesGrasp_BUFF = ConROC:Aura(_NaturesGrasp, timeShift);
+    local _OmenofClarity, _OmenofClarity_RDY = ConROC:AbilityReady(Ability.OmenofClarity, timeShift);
+        local _OmenofClarity_BUFF = ConROC:Aura(_OmenofClarity, timeShift);
+    local _Thorns, _Thorns_RDY = ConROC:AbilityReady(Ability.Thorns, timeShift);
+        local _Thorns_BUFF = ConROC:Aura(_Thorns, timeShift);
 
-        local bFormBUFF                                         = ConROC:Form(_BearForm);       
-    local cowerRDY                                          = ConROC:AbilityReady(_Cower, timeShift);
-    local dRoarRDY                                          = ConROC:AbilityReady(_DemoralizingRoar, timeShift);
-        local dRoarDebuff                                       = ConROC:TargetDebuff(_DemoralizingRoar, timeShift);    
-    local fRegenRDY                                         = ConROC:AbilityReady(_FrenziedRegeneration, timeShift);
+        local _BearForm_FORM = ConROC:Form(_BearForm);
+    local _DemoralizingRoar, _DemoralizingRoar_RDY = ConROC:AbilityReady(Ability.DemoralizingRoar, timeShift);
+        local _DemoralizingRoar_DEBUFF = ConROC:TargetAura(_DemoralizingRoar, timeShift);
+    local _FrenziedRegeneration, _FrenziedRegeneration_RDY = ConROC:AbilityReady(Ability.FrenziedRegeneration, timeShift);
 
-    local aPoisonRDY                                        = ConROC:AbilityReady(Resto_Ability.AbolishPoison, timeShift);
-    local rCurseRDY                                         = ConROC:AbilityReady(Resto_Ability.RemoveCurse, timeShift);
-    local clearCastingBUFF                                  = ConROC:BuffName(ids.Player_Buff.clearCasting, timeShift);
-    local fofStormragegBUFF                                  = ConROC:BuffName(ids.Player_Buff.FuryofStormrage, timeShift);
-    
---Conditions    
-    local playerPh                                          = ConROC:PercentHealth('player');
-    local incombat                                          = UnitAffectingCombat('player');
-    
+    local _, _, _, _ClearCasting_UP = ConROC:Aura(Buff.ClearCasting, timeShift);
+    local _, _, _, _FuryofStormrage_UP = ConROC:Aura(Buff.FuryofStormrage, timeShift);
+
 --Rotations 
-    if thornsRDY and not thornsBUFF then
+    if _Thorns_RDY and not _Thorns_BUFF then
         return _Thorns;
     end
-    
-    if oofcRDY and not oofcBUFF then
+
+    if _OmenofClarity_RDY and not _OmenofClarity_BUFF then
         return Bal_Ability.OmenofClarity;
     end
-    
-    if nGraspRDY and not nGraspBUFF then
+
+    if _NaturesGrasp_RDY and not _NaturesGrasp_BUFF then
         return _NaturesGrasp;
     end
-    
-    if bFormBUFF then
-        if dRoarRDY and not dRoarDebuff then
+
+    if _BearForm_FORM then
+        if _DemoralizingRoar_RDY and not _DemoralizingRoar_DEBUFF then
             return _DemoralizingRoar;
         end
     end
-    
-    if bskinRDY then
+
+    if _Barkskin_RDY then
         return Bal_Ability.Barkskin;
     end
-    if (clearCastingBUFF or fofStormragegBUFF) and playerPh < 60 then
+    if (_ClearCasting_UP or _FuryofStormrage_UP) and _Player_Percent_Health < 60 then
         return ids.optionMaxIds.HealingTouch;
     end
     return nil;
 end
 
 function ConROC:PowerShift()
-
     local frame = CreateFrame("Frame", "ConROCPowerShift", UIParent)
-        
         frame:SetFrameStrata('MEDIUM');
         frame:SetFrameLevel('5')
         frame:SetSize(50, 10) -- 50 with Roles turned on. 20 when off.
         frame:SetAlpha(1)
-        
+
         frame:SetPoint("LEFT", "ConROCWindow", "RIGHT", 15, -15)
         frame:SetMovable(false)
         frame:EnableMouse(true)
         frame:SetClampedToScreen(true)
-        
+
         local fonttitle = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalMed3");
             fonttitle:SetText("Powershift");
             fonttitle:SetPoint('TOP', frame, 'TOP', 0, 0);
         local fonttitle2 = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalMed3");
             fonttitle2:SetText("Cat Next");
             fonttitle2:SetPoint('TOP', frame, 'TOP', 0, -15);
-            
+
         frame:Hide();
 end
+
 function ConROC:JustCasted(spellID)
     if spellID == _Lacerate or _RuneLacerate then
         local expTime = GetTime() + 15;
@@ -963,7 +624,7 @@ function ConROC:JustCasted(spellID)
         local expTime = GetTime() + 12
         bMangleEXP = expTime;
     end
-    if spellID == _MangleCat or _RuneCatMangle then
+    if spellID == _MangleCat or _MangleCat then
         local expTime = GetTime() + 12
         cMangleEXP = expTime;
     end
