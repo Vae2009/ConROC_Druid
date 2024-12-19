@@ -168,10 +168,8 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
         local _, _Lacerate_COUNT, _Lacerate_DUR = ConROC:TargetAura(_Lacerate, timeShift);
     local _MangleBear, _MangleBear_RDY = ConROC:AbilityReady(Runes.MangleBear, timeShift);
         local _MangleBear_DEBUFF, _, _MangleBear_DUR = ConROC:TargetAura(_MangleBear, timeShift);
-        _MangleBear_DUR = _MangleBear_DUR or 0;
     local _MangleCat, _MangleCat_RDY = ConROC:AbilityReady(Runes.MangleCat, timeShift);
         local _, _, _MangleCat_DUR = ConROC:TargetAura(_MangleCat, timeShift);
-        _MangleCat_DUR = _MangleCat_DUR or 0;
     local _Sunfire, _Sunfire_RDY = ConROC:AbilityReady(Runes.Sunfire, timeShift);
         local _Sunfire_DEBUFF = ConROC:TargetAura(_Sunfire, timeShift);
     local _StarSurge, _StarSurge_RDY = ConROC:AbilityReady(Runes.StarSurge, timeShift);
@@ -258,7 +256,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
             end
             
             if _SavageRoar_RDY and _Combo > 1 and (not _SavageRoar_UP or _SavageRoar_DUR < 2) then
-                return _RuneSavageRoar;
+                return _SavageRoar;
             end
             
             if _MangleCat_RDY and _Combo ~= _Combo_Max and _MangleCat_DUR <= 1.2 then
@@ -298,13 +296,13 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
             end
 
             if _Lacerate_RDY and _Lacerate_COUNT == 5 and _Lacerate_DUR <=1.5 then
-                return _RuneLacerate;
+                return _Lacerate;
             end
             if _MangleBear_RDY and not _MangleBear_DEBUFF and _MangleBear_DUR <= 1.2 then
-                return _RuneBearMangle;
+                return _BearMangle;
             end
             if _Lacerate_RDY and (_Lacerate_COUNT < 5 and _Lacerate_DUR <= 8) and _Rage >= 15 then
-                return _RuneLacerate;
+                return _Lacerate;
             end
             if _Swipe_RDY and (_Rage >= _Rage_Max - 40 or _target_in_melee >= 3) then
                 return _Swipe;
@@ -319,7 +317,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
     --elseif currentSpecName == "Balance" then
 
         if _MoonkinForm_RDY and not _MoonkinForm_FORM then
-            return Bal_Ability.MoonkinForm;
+            return _MoonkinForm;
         end
         if _MoonkinForm_FORM then        
         --    if not _in_combat then
@@ -336,11 +334,11 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
         --    end
 
             if _StarSurge_RDY then
-                return _RuneStarSurge;
+                return _StarSurge;
             end
 
             if _Sunfire_RDY and not _Sunfire_DEBUFF then
-                return _RuneSunfire;
+                return _Sunfire;
             end
 
             if _Moonfire_RDY and not _Moonfire_RDY then
@@ -371,11 +369,11 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
 
         if _is_Enemy then
             if _StarSurge_RDY then
-                return _RuneStarSurge;
+                return _StarSurge;
             end
 
             if _Sunfire_RDY and not _Sunfire_DEBUFF then
-                return _RuneSunfire;
+                return _Sunfire;
             end
             if _Moonfire_RDY and not _Moonfire_RDY then
                 return _Moonfire;
@@ -564,7 +562,7 @@ function ConROC.Druid.Defense(_, timeShift, currentSpell, gcd)
     end
 
     if _OmenofClarity_RDY and not _OmenofClarity_BUFF then
-        return Bal_Ability.OmenofClarity;
+        return _OmenofClarity;
     end
 
     if _NaturesGrasp_RDY and not _NaturesGrasp_BUFF then
@@ -578,46 +576,47 @@ function ConROC.Druid.Defense(_, timeShift, currentSpell, gcd)
     end
 
     if _Barkskin_RDY then
-        return Bal_Ability.Barkskin;
+        return _Barkskin;
     end
+
     if (_ClearCasting_UP or _FuryofStormrage_UP) and _Player_Percent_Health < 60 then
-        return ids.optionMaxIds.HealingTouch;
+        return _HealingTouch;
     end
-    return nil;
+return nil;
 end
 
 function ConROC:PowerShift()
     local frame = CreateFrame("Frame", "ConROCPowerShift", UIParent)
-        frame:SetFrameStrata('MEDIUM');
-        frame:SetFrameLevel('5')
-        frame:SetSize(50, 10) -- 50 with Roles turned on. 20 when off.
-        frame:SetAlpha(1)
+    frame:SetFrameStrata('MEDIUM');
+    frame:SetFrameLevel('5')
+    frame:SetSize(50, 10) -- 50 with Roles turned on. 20 when off.
+    frame:SetAlpha(1)
 
-        frame:SetPoint("LEFT", "ConROCWindow", "RIGHT", 15, -15)
-        frame:SetMovable(false)
-        frame:EnableMouse(true)
-        frame:SetClampedToScreen(true)
+    frame:SetPoint("LEFT", "ConROCWindow", "RIGHT", 15, -15)
+    frame:SetMovable(false)
+    frame:EnableMouse(true)
+    frame:SetClampedToScreen(true)
 
-        local fonttitle = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalMed3");
-            fonttitle:SetText("Powershift");
-            fonttitle:SetPoint('TOP', frame, 'TOP', 0, 0);
-        local fonttitle2 = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalMed3");
-            fonttitle2:SetText("Cat Next");
-            fonttitle2:SetPoint('TOP', frame, 'TOP', 0, -15);
+    local fonttitle = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalMed3");
+        fonttitle:SetText("Powershift");
+        fonttitle:SetPoint('TOP', frame, 'TOP', 0, 0);
+    local fonttitle2 = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalMed3");
+        fonttitle2:SetText("Cat Next");
+        fonttitle2:SetPoint('TOP', frame, 'TOP', 0, -15);
 
-        frame:Hide();
+    frame:Hide();
 end
 
 function ConROC:JustCasted(spellID)
-    if spellID == _Lacerate or _RuneLacerate then
+    if spellID == _Lacerate then
         local expTime = GetTime() + 15;
         lacerateEXP = expTime;
     end
-    if spellID == _MangleBear or _RuneBearMangle then
+    if spellID == _MangleBear then
         local expTime = GetTime() + 12
         bMangleEXP = expTime;
     end
-    if spellID == _MangleCat or _MangleCat then
+    if spellID == _MangleCat then
         local expTime = GetTime() + 12
         cMangleEXP = expTime;
     end
