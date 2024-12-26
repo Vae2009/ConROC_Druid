@@ -1,16 +1,15 @@
 ConROC.Druid = {};
 
 local ConROC_Druid, ids = ...;
-local currentSpecName;
-local currentSpecID;
 
 function ConROC:EnableRotationModule()
     self.Description = 'Druid';
     self.NextSpell = ConROC.Druid.Damage;
 
     self:RegisterEvent('UNIT_SPELLCAST_SUCCEEDED');
-    self:RegisterEvent("PLAYER_TALENT_UPDATE");
     self.lastSpellId = 0;
+
+	ConROC:SpellmenuClass();
 
     ConROC:PowerShift();
 end
@@ -23,36 +22,12 @@ function ConROC:UNIT_SPELLCAST_SUCCEEDED(event, unitID, lineID, spellID)
     if unitID == 'player' then
         self.lastSpellId = spellID;
     end
-
-    --ConROC:JustCasted(spellID);
 end
 
-local Racial, Spec, Ability, Bal_Talent, Feral_Talent, Resto_Talent, Runes, Buff, Debuff = ids.Racial, ids.Spec, ids.Ability, ids.Balance_Talent, ids.FeralCombat_Talent, ids.Restoration_Talent, ids.Runes, ids.Buff, ids.Debuff;
-local lacerateEXP = 0;
-local bMangleEXP = 0;
-local cMangleEXP = 0;
-local demoRoarEXP = 0;
-local lastEclipse;
-
-function ConROC:SpecUpdate()
-    currentSpecName = ConROC:currentSpec()
-    currentSpecID = ConROC:currentSpec("ID")
-
-    if currentSpecName then
-       ConROC:Print(self.Colors.Info .. "Current spec:", self.Colors.Success ..  currentSpecName)
-    else
-       ConROC:Print(self.Colors.Error .. "You do not currently have a spec.")
-    end
-end
-
-ConROC:SpecUpdate()
-
-function ConROC:PLAYER_TALENT_UPDATE()
-    ConROC:SpecUpdate();
-    ConROC:closeSpellmenu();
-end
+local Racial, Spec, Ability, Rank, Bal_Talent, Feral_Talent, Resto_Talent, Engrave, Runes, Buff, Debuff = ids.Racial, ids.Spec, ids.Ability, ids.Rank, ids.Balance_Talent, ids.FeralCombat_Talent, ids.Restoration_Talent, ids.Engrave, ids.Runes, ids.Buff, ids.Debuff;
 
 --Info
+local _Player_Spec, _Player_Spec_ID = ConROC:currentSpec();
 local _Player_Level = UnitLevel("player");
 local _Player_Percent_Health = ConROC:PercentHealth('player');
 local _is_PvP = ConROC:IsPvP();
@@ -82,6 +57,7 @@ local _can_Execute = _Target_Percent_Health < 20;
 local _Berserking, _Berserking_RDY = _, _;
 
 function ConROC:Stats()
+    _Player_Spec, _Player_Spec_ID = ConROC:currentSpec();
 	_Player_Level = UnitLevel("player");
 	_Player_Percent_Health = ConROC:PercentHealth('player');
 	_is_PvP = ConROC:IsPvP();
@@ -314,7 +290,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
             return nil;
         end
 
-    --elseif currentSpecName == "Balance" then
+    --elseif _Player_Spec == "Balance" then
 
         if _MoonkinForm_RDY and not _MoonkinForm_FORM then
             return _MoonkinForm;
@@ -532,7 +508,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
             end
         end
     end
-    return nil;
+return nil;
 end
 
 function ConROC.Druid.Defense(_, timeShift, currentSpell, gcd)
@@ -605,23 +581,4 @@ function ConROC:PowerShift()
         fonttitle2:SetPoint('TOP', frame, 'TOP', 0, -15);
 
     frame:Hide();
-end
-
-function ConROC:JustCasted(spellID)
-    if spellID == _Lacerate then
-        local expTime = GetTime() + 15;
-        lacerateEXP = expTime;
-    end
-    if spellID == _MangleBear then
-        local expTime = GetTime() + 12
-        bMangleEXP = expTime;
-    end
-    if spellID == _MangleCat then
-        local expTime = GetTime() + 12
-        cMangleEXP = expTime;
-    end
-    if spellID == _DemoralizingRoar then
-        local expTime = GetTime() + 30
-        demoRoarEXP = expTime;
-    end
 end
