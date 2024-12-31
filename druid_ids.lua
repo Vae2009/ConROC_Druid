@@ -272,7 +272,12 @@ ids.Restoration_Talent = {
 	TranquilSpirit =  14,
 	Swiftmend =  15,
 }
+ids.Engrave = {
+
+}
 ids.Runes = {
+	Berserk = 417141,
+
 	Sunfire = 414684,
 	MangleBear = 407995,
 	MangleCat = 407993,

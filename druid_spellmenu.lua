@@ -22,24 +22,68 @@ local _Player_Level = UnitLevel('player');
 
 local defaults = {
 	["ConROC_SM_Role_Caster"] = true,
+	["ConROC_Caster_DoT_Moonfire"] = true,
+	["ConROC_Caster_DoT_Sunfire"] = true,
+	["ConROC_Caster_DoT_Rake"] = false,
 	["ConROC_Caster_DoT_Rip"] = false,
+	["ConROC_Caster_Debuff_DemoralizingRoar"] = false,
 	["ConROC_Caster_Debuff_FaerieFire"] = false,
+	["ConROC_Caster_Debuff_FaerieFireFeral"] = false,
+	["ConROC_Caster_Buff_Thorns"] = true,
+	["ConROC_Caster_Buff_NaturesGrasp"] = false,
+	["ConROC_Caster_Buff_OmenofClarity"] = true,
+	["ConROC_Caster_CD_Enrage"] = true,
+	["ConROC_Caster_CD_Berserk"] = true,
+	["ConROC_Caster_CD_Barkskin"] = false,
 	["ConROC_Caster_Option_AoE"] = false,
 
 	["ConROC_SM_Role_Melee"] = false,
-	["ConROC_Melee_DoT_Rip"] = false,
+	["ConROC_Melee_DoT_Moonfire"] = false,
+	["ConROC_Melee_DoT_Sunfire"] = false,
+	["ConROC_Melee_DoT_Rake"] = true,
+	["ConROC_Melee_DoT_Rip"] = true,
+	["ConROC_Melee_Debuff_DemoralizingRoar"] = false,
 	["ConROC_Melee_Debuff_FaerieFire"] = false,
+	["ConROC_Melee_Debuff_FaerieFireFeral"] = true,
+	["ConROC_Melee_Buff_Thorns"] = true,
+	["ConROC_Melee_Buff_NaturesGrasp"] = false,
+	["ConROC_Melee_Buff_OmenofClarity"] = true,
+	["ConROC_Melee_CD_Enrage"] = true,
+	["ConROC_Melee_CD_Berserk"] = false,
+	["ConROC_Melee_CD_Barkskin"] = false,
 	["ConROC_Melee_Option_AoE"] = false,
 
 	["ConROC_SM_Role_Tank"] = false,
-	["ConROC_Tank_DoT_Rip"] = false,	
+	["ConROC_Tank_DoT_Moonfire"] = false,
+	["ConROC_Tank_DoT_Sunfire"] = false,
+	["ConROC_Tank_DoT_Rake"] = false,
+	["ConROC_Tank_DoT_Rip"] = false,
+	["ConROC_Tank_Debuff_DemoralizingRoar"] = true,
 	["ConROC_Tank_Debuff_FaerieFire"] = false,
+	["ConROC_Tank_Debuff_FaerieFireFeral"] = true,
+	["ConROC_Tank_Buff_Thorns"] = true,
+	["ConROC_Tank_Buff_NaturesGrasp"] = false,
+	["ConROC_Tank_Buff_OmenofClarity"] = true,
+	["ConROC_Tank_CD_Enrage"] = true,
+	["ConROC_Tank_CD_Berserk"] = true,
+	["ConROC_Tank_CD_Barkskin"] = true,
 	["ConROC_Tank_Option_AoE"] = false,
 
-	["ConROC_SM_Role_PvP"] = false,
-	["ConROC_PvP_DoT_Rip"] = false,
-	["ConROC_PvP_Debuff_FaerieFire"] = false,
-	["ConROC_PvP_Option_AoE"] = false,
+	["ConROC_SM_Role_Healer"] = false,
+	["ConROC_Healer_DoT_Moonfire"] = false,
+	["ConROC_Healer_DoT_Sunfire"] = false,
+	["ConROC_Healer_DoT_Rake"] = false,
+	["ConROC_Healer_DoT_Rip"] = false,
+	["ConROC_Healer_Debuff_DemoralizingRoar"] = false,
+	["ConROC_Healer_Debuff_FaerieFire"] = false,
+	["ConROC_Healer_Debuff_FaerieFireFeral"] = false,
+	["ConROC_Healer_Buff_Thorns"] = true,
+	["ConROC_Healer_Buff_NaturesGrasp"] = false,
+	["ConROC_Healer_Buff_OmenofClarity"] = true,
+	["ConROC_Healer_CD_Enrage"] = false,
+	["ConROC_Healer_CD_Berserk"] = false,
+	["ConROC_Healer_CD_Barkskin"] = false,
+	["ConROC_Healer_Option_AoE"] = false,
 }
 
 ConROCDruidSpells = ConROCDruidSpells or defaults;
@@ -109,8 +153,9 @@ local function CheckScrollbarVisibility()
     end
 end
 
-function ConROC:SpellmenuClass()
-	ConROC:UpdateSpellID();
+function ConROC:RotationChoices()
+    ConROC:UpdateSpellID();
+
 	ConROC_RoleSettingsTable = {
 		{
 			frameName = "Caster",
@@ -131,17 +176,19 @@ function ConROC:SpellmenuClass()
 			role = "ConROC_SM_Role_Tank",
 		},
 		{
-			frameName = "PvP",
-			activeTexture = ConROC.Textures.PvP,
-			disabledTexture = ConROC.Textures.PvP_disabled,
-			role = "ConROC_SM_Role_PvP",
+			frameName = "Healer",
+			activeTexture = ConROC.Textures.Healer,
+			disabledTexture = ConROC.Textures.Healer_disabled,
+			role = "ConROC_SM_Role_Healer",
 		}
 	}
 	ConROC_RotationSettingsTable = {
 		{
-			frameName = "DoT",
+			frameName = "DoTs",
 			spells = {
-				--{spellID = ids.Ability.Moonfire, spellCheckbox = "DoT_Moonfire", reqLevel = 5, type="spell"},
+				{spellID = ids.Ability.Moonfire, spellCheckbox = "DoT_Moonfire", reqLevel = 5, type="spell"},
+				{spellID = ids.Runes.Sunfire, spellCheckbox = "DoT_Sunfire", reqLevel = 1, type="spell"},
+				{spellID = ids.Ability.Rake, spellCheckbox = "DoT_Rake", reqLevel = 24, type="spell"},
 				{spellID = ids.Ability.Rip, spellCheckbox = "DoT_Rip", reqLevel = 20, type="spell"},
 			},
 			groupType = "checkBoxes"
@@ -149,18 +196,29 @@ function ConROC:SpellmenuClass()
 		{
 			frameName = "Debuffs",
 			spells = {
+				{spellID = ids.Ability.DemoralizingRoar, spellCheckbox = "Debuff_DemoralizingRoar", reqLevel = 10, type="spell"},
 				{spellID = ids.Ability.FaerieFire, spellCheckbox = "Debuff_FaerieFire", reqLevel = 18, type="spell"},
 				{spellID = ids.Ability.FaerieFireFeral, spellCheckbox = "Debuff_FaerieFireFeral", reqLevel = 30, type="spell"},
 			},
 			groupType = "checkBoxes"
 		},
-		--[[{
+		{
+			frameName = "Buffs",
+			spells = {
+				{spellID = ids.Ability.Thorns, spellCheckbox = "Buff_Thorns", reqLevel = 6, type="spell"},
+				{spellID = ids.Ability.NaturesGrasp, spellCheckbox = "Buff_NaturesGrasp", reqLevel = 10, type="spell"},
+				{spellID = ids.Ability.OmenofClarity, spellCheckbox = "Buff_OmenofClarity", reqLevel = 20, type="spell"},
+			}
+		},
+		{
 			frameName = "Cooldowns",
 			spells = {
-				{spellID = ids.optionMaxIds.ForceofNature, spellCheckbox = "CD_ForceofNature", reqLevel = 60, type="spell"},
-				
+				--{spellID = ids.Ability.ForceofNature, spellCheckbox = "CD_ForceofNature", reqLevel = 60, type="spell"},
+				{spellID = ids.Ability.Enrage, spellCheckbox = "CD_Enrage", reqLevel = 10, type="spell"},
+				{spellID = ids.Runes.Berserk, spellCheckbox = "CD_Berserk", reqLevel = 10, type="spell"},
+				{spellID = ids.Ability.Barkskin, spellCheckbox = "CD_Barkskin", reqLevel = 44, type="spell"},
 			}
-		},--]]
+		},
 		{
 	    	frameName = "Options",
 	    	spells = {
@@ -169,6 +227,10 @@ function ConROC:SpellmenuClass()
 	    	}
 		}
 	}
+end
+
+function ConROC:SpellmenuClass()
+	ConROC:RotationChoices();
 
 	local _, Class, classId = UnitClass("player")
 	local Color = RAID_CLASS_COLORS[Class]
@@ -712,8 +774,9 @@ function ConROC:OptionNone(_spellData, i, j, _spellFrame, _checkType, _radioButt
     lastFrame:Show();
 end
 
-function ConROC:SpellMenuUpdate(newSpell)
-	ConROC:UpdateSpellID();
+function ConROC:SpellMenuUpdate()
+	ConROC:RotationChoices();
+
 	lastFrame = ConROCScrollChild;
 	local anyHLVisible = false;
 	scrollHeight = 0;
@@ -767,9 +830,9 @@ function ConROC:SpellMenuUpdate(newSpell)
 							oItem:Hide()
 							--print("Hide spell", spellName)
 						end
-					else
-						scrollHeight = scrollHeight + math.ceil(lFrame:GetHeight());
-						spellFrameHeight = spellFrameHeight + math.ceil(oItem:GetHeight());
+					--else
+					--	scrollHeight = scrollHeight + math.ceil(lFrame:GetHeight());
+					--	spellFrameHeight = spellFrameHeight + math.ceil(oItem:GetHeight());
 					end
 				--spell end
 				elseif _spellData.type == "aoetoggler" then
@@ -906,10 +969,6 @@ function ConROC:SpellMenuUpdate(newSpell)
 		CheckScrollbarVisibility();
 		ConROCScrollContainer:Show();
 		ConROCScrollChild:Show();
-	end
-
-	if newSpell then
-		ConROC:closeSpellmenu()
 	end
 end
 
