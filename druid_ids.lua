@@ -273,27 +273,29 @@ ids.Restoration_Talent = {
 	Swiftmend =  15,
 }
 ids.Engrave = {
-
+	--Waist--
+	Eclipse = 7106,
 }
 ids.Runes = {
 	Berserk = 417141,
-
+	StarSurge = 417157,
+	Starfall = 439748,
 	Sunfire = 414684,
+
 	MangleBear = 407995,
 	MangleCat = 407993,
 	Lacerate = 414644,
-	StarSurge = 417157,
 	SavageRoar = 407988,
 	SkullBash = 410176,
 	KingoftheJungle = 417046, --phase 2 - passive
-	Eclipse = 408248, --phase 2 - passive
 }
 ids.Buff = {
 	FuryofStormrage = 414800,
 	ClearCasting = 16870,
 }
 ids.Debuff = {
-
+	EclipseLunar = 408255,
+	EclipseSolar = 408250,
 }
 
 function ConROC:UpdateSpellID()

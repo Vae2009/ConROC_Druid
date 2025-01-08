@@ -213,6 +213,7 @@ function ConROC:RotationChoices()
 		{
 			frameName = "Cooldowns",
 			spells = {
+				{spellID = ids.Runes.Starfall, spellCheckbox = "CD_Starfall", reqLevel = 1, type="spell"},
 				--{spellID = ids.Ability.ForceofNature, spellCheckbox = "CD_ForceofNature", reqLevel = 60, type="spell"},
 				{spellID = ids.Ability.Enrage, spellCheckbox = "CD_Enrage", reqLevel = 10, type="spell"},
 				{spellID = ids.Runes.Berserk, spellCheckbox = "CD_Berserk", reqLevel = 10, type="spell"},

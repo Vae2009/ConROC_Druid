@@ -151,12 +151,16 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
         local _MangleBear_DEBUFF, _, _MangleBear_DUR = ConROC:TargetAura(_MangleBear, timeShift);
     local _MangleCat, _MangleCat_RDY = ConROC:AbilityReady(Runes.MangleCat, timeShift);
         local _, _, _MangleCat_DUR = ConROC:TargetAura(_MangleCat, timeShift);
-    local _Sunfire, _Sunfire_RDY = ConROC:AbilityReady(Runes.Sunfire, timeShift);
-        local _Sunfire_DEBUFF = ConROC:TargetAura(_Sunfire, timeShift);
-    local _StarSurge, _StarSurge_RDY = ConROC:AbilityReady(Runes.StarSurge, timeShift);
     local _SavageRoar, _SavageRoar_RDY = ConROC:AbilityReady(Runes.SavageRoar, timeShift);
         local _SavageRoar_BUFF, _, _SavageRoar_DUR = ConROC:Aura(_SavageRoar, timeShift);
     local _SkullBash, _SkullBash_RDY = ConROC:AbilityReady(Runes.SkullBash, timeShift);
+    local _StarSurge, _StarSurge_RDY = ConROC:AbilityReady(Runes.StarSurge, timeShift);
+        local _EclipseLunar_BUFF, _EclipseLunar_COUNT = ConROC:Aura(Buff.EclipseLunar, timeShift);
+        local _EclipseSolar_BUFF, _EclipseSolar_COUNT = ConROC:Aura(Buff.EclipseSolar, timeShift);
+    local _Starfall, _Starfall_RDY = ConROC:AbilityReady(Runes.Starfall, timeShift);
+        local _Starfall_BUFF = ConROC:Aura(_Starfall, timeShift);
+    local _Sunfire, _Sunfire_RDY = ConROC:AbilityReady(Runes.Sunfire, timeShift);
+        local _Sunfire_DEBUFF = ConROC:TargetAura(_Sunfire, timeShift);
 
 --Conditions
     local _is_stealthed = IsStealthed();
@@ -187,6 +191,14 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
         shredBonus = select(2, ConROC:TalentChosen(Spec.Feral, Feral_Talent.ImprovedShred));
 
         _Shred_COST = _Shred_COST - (shredBonus * 6);
+    end
+
+    if currentSpell == _Starfire then
+        _EclipseLunar_COUNT = _EclipseLunar_COUNT - 1;
+        _EclipseSolar_COUNT = _EclipseSolar_COUNT + 2;
+    elseif currentSpell == _Wrath then
+        _EclipseSolar_COUNT = _EclipseSolar_COUNT - 1;
+        _EclipseLunar_COUNT = _EclipseLunar_COUNT + 1;
     end
 
     ConROCPowerShift:Hide();
@@ -230,15 +242,6 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                 end
 
                 if _CatForm_FORM then
-                --    if sRoarRDY and _Combo >= 1 then
-                --        if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy - 35 <= 8 then
-                --            ConROCPowerShift:Show();
-                --        end
-                --        tinsert(ConROC.SuggestedSpells, _FerociousBite);
-                --        _Queue = _Queue + 1;
-                --        break;
-                --    end
-
                     if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy <= 8 then
                             ConROCPowerShift:Show();
                     end
@@ -251,7 +254,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         break;
                     end
 
-                    if _FaerieFireFeral_RDY and not (_FaerieFire_DEBUFF or _FaerieFireFeral_DEBUFF) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFireFeral) then
+                    if ConROC:CheckBox(ConROC_SM_Debuff_FaerieFireFeral) and _FaerieFireFeral_RDY and not (_FaerieFire_DEBUFF or _FaerieFireFeral_DEBUFF) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFireFeral) then
                         tinsert(ConROC.SuggestedSpells, _FaerieFireFeral);
                         _FaerieFireFeral_DEBUFF = true;
                         _Queue = _Queue + 1;
@@ -290,7 +293,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         break;
                     end
 
-                    if _Rip_RDY and not _Rip_DEBUFF and _SavageRoar_BUFF and _Combo == _Combo_Max and ConROC:CheckBox(ConROC_SM_DoT_Rip) then --and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
+                    if ConROC:CheckBox(ConROC_SM_DoT_Rip) and _Rip_RDY and not _Rip_DEBUFF and _SavageRoar_BUFF and _Combo == _Combo_Max then --and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
                         tinsert(ConROC.SuggestedSpells, _Rip);
                         _Rip_DEBUFF = true;
                         _Combo = 0;
@@ -350,7 +353,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         break;
                     end
 
-                    if _FaerieFireFeral_RDY and not (_FaerieFire_DEBUFF or _FaerieFireFeral_DEBUFF) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFireFeral) then
+                    if ConROC:CheckBox(ConROC_SM_Debuff_FaerieFireFeral) and _FaerieFireFeral_RDY and not (_FaerieFire_DEBUFF or _FaerieFireFeral_DEBUFF) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFireFeral) then
                         tinsert(ConROC.SuggestedSpells, _FaerieFireFeral);
                         _FaerieFireFeral_DEBUFF = true;
                         _Queue = _Queue + 1;
@@ -399,80 +402,109 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         _Queue = _Queue + 1;
                         break;
                     end
-                elseif _MoonkinForm_FORM then
-                --    if not _in_combat then
-                --      if _Starfire_RDY then
-                --          tinsert(ConROC.SuggestedSpells, _Starfire);
-                --          _Queue = _Queue + 1;
-                --          break;
-                --        end
-                --        
-                --        if _Wrath_RDY then
-                --           tinsert(ConROC.SuggestedSpells, _Wrath);
-                --        _Queue = _Queue + 1;
-                --        break;
-                --        end 
-                --    end
+                elseif _MoonkinForm_FORM or ConROC:RuneEquipped(Engrave.Eclipse, "waist") then
+                    if not _in_combat then
+                        if _Wrath_RDY and currentSpell ~= _Wrath then
+                            tinsert(ConROC.SuggestedSpells, _Wrath);
+                            _Wrath_RDY = false;
+                            _EclipseSolar_COUNT = _EclipseSolar_COUNT - 1;
+                            _EclipseLunar_COUNT = _EclipseLunar_COUNT + 1;
+                            _Queue = _Queue + 1;
+                            break;
+                        end
 
-                --    if _Hurricane_RDY and (_target_in_melee >= 4 or ConROC_AoEButton:IsVisible()) then
-                --        tinsert(ConROC.SuggestedSpells, _Hurricane);
-                --        _Queue = _Queue + 1;
-                --        break;
-                --    end
+                        if _StarSurge_RDY then
+                            tinsert(ConROC.SuggestedSpells, _StarSurge);
+                            _StarSurge_RDY = false;
+                            _EclipseLunar_COUNT = _EclipseLunar_COUNT + 1;
+                            _EclipseSolar_COUNT = _EclipseSolar_COUNT + 2;
+                            _Queue = _Queue + 1;
+                            break;
+                        end
+                    end
 
-                    if _StarSurge_RDY then
-                        tinsert(ConROC.SuggestedSpells, _StarSurge);
-                        _StarSurge_RDY = false;
+                    if ConROC:CheckBox(ConROC_SM_CD_Starfall) and _Starfall_RDY and not _Starfall_BUFF then
+                        tinsert(ConROC.SuggestedSpells, _Starfall);
+                        _Starfall_RDY = false;
+                        _Starfall_BUFF = true;
                         _Queue = _Queue + 1;
                         break;
                     end
 
-                    if _Sunfire_RDY and not _Sunfire_DEBUFF then
+                    if _Hurricane_RDY and (ConROC_AoEButton:IsVisible() or _enemies_in_30yrds >= 6) then
+                        tinsert(ConROC.SuggestedSpells, _Hurricane);
+                        _Hurricane_RDY = false;
+                        _Queue = _Queue + 1;
+                        break;
+                    end
+
+                    if ConROC:CheckBox(ConROC_SM_DoT_Sunfire) and _Sunfire_RDY and not _Sunfire_DEBUFF then
                         tinsert(ConROC.SuggestedSpells, _Sunfire);
                         _Sunfire_DEBUFF = true;
                         _Queue = _Queue + 1;
                         break;
                     end
 
-                    if _Moonfire_RDY and not _Moonfire_DEBUFF then
+                    if ConROC:CheckBox(ConROC_SM_DoT_Moonfire) and _Moonfire_RDY and not _Moonfire_DEBUFF then
                         tinsert(ConROC.SuggestedSpells, _Moonfire);
                         _Moonfire_DEBUFF = true;
                         _Queue = _Queue + 1;
                         break;
                     end
 
-                --    if _Moonfire_RDY and not _Moonfire_RDY and ConROC_AoEButton:IsVisible() then
-                --        tinsert(ConROC.SuggestedSpells, _Moonfire);
-                --        _Queue = _Queue + 1;
-                --        break;
-                --    end
+                    if _StarSurge_RDY and _EclipseLunar_COUNT <= 3 then
+                        tinsert(ConROC.SuggestedSpells, _StarSurge);
+                        _StarSurge_RDY = false;
+                        _EclipseLunar_COUNT = _EclipseLunar_COUNT + 1;
+                        _EclipseSolar_COUNT = _EclipseSolar_COUNT + 2;
+                        _Queue = _Queue + 1;
+                        break;
+                    end
 
-                    if _FaerieFire_RDY and not (_FaerieFire_DEBUFF or _FaerieFireFeral_DEBUFF) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFire) then
+                    if _Starfire_RDY and _EclipseLunar_COUNT >= 1 then
+                        tinsert(ConROC.SuggestedSpells, _Starfire);
+                        _EclipseLunar_COUNT = _EclipseLunar_COUNT - 1;
+                        _EclipseSolar_COUNT = _EclipseSolar_COUNT + 2;
+                        _Queue = _Queue + 1;
+                        break;
+                    end
+
+                    if ConROC:CheckBox(ConROC_SM_Debuff_FaerieFire) and _FaerieFire_RDY and not (_FaerieFire_DEBUFF or _FaerieFireFeral_DEBUFF) then
                         tinsert(ConROC.SuggestedSpells, _FaerieFire);
                         _FaerieFire_DEBUFF = true;
                         _Queue = _Queue + 1;
                         break;
                     end
 
-                    if _InsectSwarm_RDY and not _InsectSwarm_DEBUFF then
+                    if ConROC:CheckBox(ConROC_SM_DoT_InsectSwarm) and _InsectSwarm_RDY and not _InsectSwarm_DEBUFF then
                         tinsert(ConROC.SuggestedSpells, _InsectSwarm);
                         _InsectSwarm_DEBUFF = true;
                         _Queue = _Queue + 1;
                         break;
                     end
 
-                --    if _Starfire_RDY then
-                --        tinsert(ConROC.SuggestedSpells, _Starfire);
-                --        _Queue = _Queue + 1;
-                --        break;
-                --    end
-
                     if _Wrath_RDY then
                         tinsert(ConROC.SuggestedSpells, _Wrath);
+                        _EclipseSolar_COUNT = _EclipseSolar_COUNT - 1;
+                        _EclipseLunar_COUNT = _EclipseLunar_COUNT + 1;
                         _Queue = _Queue + 1;
                         break;
                     end
                 elseif not ConROC:CheckBox(ConROC_SM_Role_Healer) or (_is_Enemy and ConROC:CheckBox(ConROC_SM_Role_Healer)) then
+                    if ConROC:CheckBox(ConROC_SM_DoT_Sunfire) and _Sunfire_RDY and not _Sunfire_DEBUFF then
+                        tinsert(ConROC.SuggestedSpells, _Sunfire);
+                        _Sunfire_DEBUFF = true;
+                        _Queue = _Queue + 1;
+                        break;
+                    end
+
+                    if ConROC:CheckBox(ConROC_SM_DoT_Moonfire) and _Moonfire_RDY and not _Moonfire_DEBUFF then
+                        tinsert(ConROC.SuggestedSpells, _Moonfire);
+                        _Moonfire_DEBUFF = true;
+                        _Queue = _Queue + 1;
+                        break;
+                    end
+
                     if _StarSurge_RDY then
                         tinsert(ConROC.SuggestedSpells, _StarSurge);
                         _StarSurge_RDY = false;
@@ -480,28 +512,14 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         break;
                     end
 
-                    if _Sunfire_RDY and not _Sunfire_DEBUFF then
-                        tinsert(ConROC.SuggestedSpells, _Sunfire);
-                        _Sunfire_DEBUFF = true;
-                        _Queue = _Queue + 1;
-                        break;
-                    end
-
-                    if _Moonfire_RDY and not _Moonfire_DEBUFF then
-                        tinsert(ConROC.SuggestedSpells, _Moonfire);
-                        _Moonfire_DEBUFF = true;
-                        _Queue = _Queue + 1;
-                        break;
-                    end
-
-                    if _FaerieFire_RDY and not (_FaerieFire_DEBUFF or _FaerieFireFeral_DEBUFF) and ConROC:CheckBox(ConROC_SM_Debuff_FaerieFire) then
+                    if ConROC:CheckBox(ConROC_SM_Debuff_FaerieFire) and _FaerieFire_RDY and not (_FaerieFire_DEBUFF or _FaerieFireFeral_DEBUFF) then
                         tinsert(ConROC.SuggestedSpells, _FaerieFire);
                         _FaerieFire_DEBUFF = true;
                         _Queue = _Queue + 1;
                         break;
                     end
 
-                    if _InsectSwarm_RDY and not _InsectSwarm_DEBUFF then
+                    if ConROC:CheckBox(ConROC_SM_DoT_InsectSwarm) and _InsectSwarm_RDY and not _InsectSwarm_DEBUFF then
                         tinsert(ConROC.SuggestedSpells, _InsectSwarm);
                         _InsectSwarm_DEBUFF = true;
                         _Queue = _Queue + 1;
