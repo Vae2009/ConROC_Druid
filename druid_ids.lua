@@ -290,12 +290,13 @@ ids.Runes = {
 	KingoftheJungle = 417046, --phase 2 - passive
 }
 ids.Buff = {
+	EclipseLunar = 408255,
+	EclipseSolar = 408250,
 	FuryofStormrage = 414800,
 	ClearCasting = 16870,
 }
 ids.Debuff = {
-	EclipseLunar = 408255,
-	EclipseSolar = 408250,
+
 }
 
 function ConROC:UpdateSpellID()

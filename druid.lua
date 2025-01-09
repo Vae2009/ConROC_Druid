@@ -155,8 +155,8 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
         local _SavageRoar_BUFF, _, _SavageRoar_DUR = ConROC:Aura(_SavageRoar, timeShift);
     local _SkullBash, _SkullBash_RDY = ConROC:AbilityReady(Runes.SkullBash, timeShift);
     local _StarSurge, _StarSurge_RDY = ConROC:AbilityReady(Runes.StarSurge, timeShift);
-        local _EclipseLunar_BUFF, _EclipseLunar_COUNT = ConROC:Aura(Buff.EclipseLunar, timeShift);
-        local _EclipseSolar_BUFF, _EclipseSolar_COUNT = ConROC:Aura(Buff.EclipseSolar, timeShift);
+        local _, _EclipseLunar_COUNT = ConROC:Aura(Buff.EclipseLunar, timeShift);
+        local _, _EclipseSolar_COUNT = ConROC:Aura(Buff.EclipseSolar, timeShift);
     local _Starfall, _Starfall_RDY = ConROC:AbilityReady(Runes.Starfall, timeShift);
         local _Starfall_BUFF = ConROC:Aura(_Starfall, timeShift);
     local _Sunfire, _Sunfire_RDY = ConROC:AbilityReady(Runes.Sunfire, timeShift);
