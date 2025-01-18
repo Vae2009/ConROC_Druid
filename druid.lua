@@ -52,6 +52,7 @@ local _is_moving = ConROC:PlayerSpeed();
 local _enemies_in_melee, _target_in_melee = ConROC:Targets("Melee");
 local _enemies_in_10yrds, _target_in_10yrds = ConROC:Targets("10");
 local _enemies_in_20yrds, _target_in_20yrds = ConROC:Targets("20");
+local _enemies_in_30yrds, _target_in_30yrds = ConROC:Targets("30");
 local _enemies_in_40yrds, _target_in_40yrds = ConROC:Targets("40");
 local _can_Execute = _Target_Percent_Health < 20;
 
@@ -80,6 +81,7 @@ function ConROC:Stats()
 	_enemies_in_melee, _target_in_melee = ConROC:Targets("Melee");
 	_enemies_in_10yrds, _target_in_10yrds = ConROC:Targets("10");
 	_enemies_in_20yrds, _target_in_20yrds = ConROC:Targets("20");
+    _enemies_in_30yrds, _target_in_30yrds = ConROC:Targets("30");
 	_enemies_in_40yrds, _target_in_40yrds = ConROC:Targets("40");
 	_can_Execute = _Target_Percent_Health < 20;
 end
@@ -402,7 +404,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         _Queue = _Queue + 1;
                         break;
                     end
-                elseif ConROC:RuneEquipped(Engrave.Eclipse, "waist") then
+                elseif _MoonkinForm_FORM or ConROC:RuneEquipped(Engrave.Eclipse, "waist") then
                     if not _in_combat then
                         if _Wrath_RDY and currentSpell ~= _Wrath then
                             tinsert(ConROC.SuggestedSpells, _Wrath);
