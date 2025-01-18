@@ -311,7 +311,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                 --        break;
                 --    end
 
-                    if _Rake_RDY and not _Rake_DEBUFF and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
+                    if ConROC:CheckBox(ConROC_SM_DoT_Rake) and _Rake_RDY and not _Rake_DEBUFF and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
                         tinsert(ConROC.SuggestedSpells, _Rake);
                         _Rake_DEBUFF = true;
                         _Combo = _Combo + 1;
@@ -402,7 +402,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         _Queue = _Queue + 1;
                         break;
                     end
-                elseif _MoonkinForm_FORM or ConROC:RuneEquipped(Engrave.Eclipse, "waist") then
+                elseif ConROC:RuneEquipped(Engrave.Eclipse, "waist") then
                     if not _in_combat then
                         if _Wrath_RDY and currentSpell ~= _Wrath then
                             tinsert(ConROC.SuggestedSpells, _Wrath);
@@ -595,7 +595,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         break;
                     end
 
-                    if _Rake_RDY and not _Rake_DEBUFF and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
+                    if ConROC:CheckBox(ConROC_SM_DoT_Rake) and _Rake_RDY and not _Rake_DEBUFF and not (ConROC:CreatureType("Undead") or ConROC:CreatureType("Mechanical") or ConROC:CreatureType("Elemental")) then
                         if ConROC:TalentChosen(Spec.Restoration, Resto_Talent.Furor) and _CatForm_COST <= _Mana and _Energy - _Rake_COST <= 8 then
                             ConROCPowerShift:Show();
                         end

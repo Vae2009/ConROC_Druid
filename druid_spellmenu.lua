@@ -423,7 +423,7 @@ function ConROC_OptionsWindow(_table, _roles)
         else
             frame:SetPoint("TOPLEFT", lastFrame, "BOTTOMLEFT", 0, -10)
         end
-        if debugOptions.header then     
+        if debugOptions.header then
             frame:SetBackdrop({
               bgFile = "Interface\\Buttons\\WHITE8x8",
               nil,
@@ -485,7 +485,6 @@ function ConROC_OptionsWindow(_table, _roles)
         end
     end
     ConROCScrollChild:SetHeight(scrollHeight);
-
 end
 
 function ConROC:OptionCheckboxSpell(_spellData, i, j, _spellFrame)
@@ -533,7 +532,7 @@ function ConROC:OptionRadioButtonSpell(_spellData, i, j, _spellFrame, _radioButt
 	end
 	local myFrame = "ConROC_SM_".._spellData.spellCheckbox
 	local oItem = CreateFrame("CheckButton", myFrame, _spellFrame, "UIRadioButtonTemplate");
-	local oItemtext = oItem:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall");		
+	local oItemtext = oItem:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall");
 	if j == 1 then
 		oItem:SetPoint("TOPLEFT", lastFrame, "TOPLEFT", 0, 0);
 	else
@@ -571,7 +570,7 @@ function ConROC:OptionRadioButtonSpell(_spellData, i, j, _spellFrame, _radioButt
 	c1t:SetPoint("LEFT", oItem, "RIGHT", 2, 0);
 	if type(_spellData.spellID) == "number" then
 		oItemtext:SetPoint('LEFT', c1t, 'RIGHT', 4, 0);
-	else				
+	else
 		oItemtext:SetPoint('LEFT', oItem, 'RIGHT', 26, 0);
 	end
 	_G[myFrame] = oItem
@@ -632,7 +631,7 @@ function ConROC:OptionTextfield(_spellData, i, j, _spellFrame)
 		oItemtext:SetText(_spellData.customName);
 	else
 		oItemtext:SetText(_spellData.spellID);
-	end			
+	end
 	oItemtext:SetPoint('LEFT', e1t, 'RIGHT', 5, 0);
 
 	--lastFrame = oItem;
@@ -795,7 +794,7 @@ function ConROC:SpellMenuUpdate()
 			--scrollHeight = scrollHeight + math.ceil(frame:GetHeight());
 			frame:Show()
 
-		   	local spellFrameHeight = 0;
+		   	spellFrameHeight = 0;
 		    local _spellFrame = _G["ConROC_CheckFrame"..i];
 			_spellFrame:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", 0, 0);
 			local lFrame = _spellFrame;
@@ -847,11 +846,11 @@ function ConROC:SpellMenuUpdate()
 					if _Player_Level >= _spellData.reqLevel then
 						lFrame = oItem;
 						lFrame:Show();
-							if oItem:IsShown() then
-								anyChildVisible = true;
-								scrollHeight = scrollHeight + math.ceil(lFrame:GetHeight());
-								spellFrameHeight = spellFrameHeight + math.ceil(oItem:GetHeight());
-						    end
+						if oItem:IsShown() then
+							anyChildVisible = true;
+							scrollHeight = scrollHeight + math.ceil(lFrame:GetHeight());
+							spellFrameHeight = spellFrameHeight + math.ceil(oItem:GetHeight());
+						end
 					else
 						if j == firstItem then
 							if j == #_spells then
