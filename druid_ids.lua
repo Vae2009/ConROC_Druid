@@ -105,6 +105,7 @@ ids.Rank = {
 	StarfireRank4 = 8951,
 	StarfireRank5 = 9875,
 	StarfireRank6 = 9876,
+	StarfireRank7 = 25298,
 	ThornsRank2 = 782,
 	ThornsRank3 = 1075,
 	ThornsRank4 = 8914,
@@ -324,7 +325,8 @@ function ConROC:UpdateSpellID()
 	if IsSpellKnown(ids.Rank.SootheAnimalRank3) then ids.Ability.SootheAnimal = ids.Rank.SootheAnimalRank3;
 	elseif IsSpellKnown(ids.Rank.SootheAnimalRank2) then ids.Ability.SootheAnimal = ids.Rank.SootheAnimalRank2; end
 
-	if IsSpellKnown(ids.Rank.StarfireRank6) then ids.Ability.Starfire = ids.Rank.StarfireRank6;
+	if IsSpellKnown(ids.Rank.StarfireRank7) then ids.Ability.Starfire = ids.Rank.StarfireRank7;
+	elseif IsSpellKnown(ids.Rank.StarfireRank6) then ids.Ability.Starfire = ids.Rank.StarfireRank6;
 	elseif IsSpellKnown(ids.Rank.StarfireRank5) then ids.Ability.Starfire = ids.Rank.StarfireRank5;
 	elseif IsSpellKnown(ids.Rank.StarfireRank4) then ids.Ability.Starfire = ids.Rank.StarfireRank4;
 	elseif IsSpellKnown(ids.Rank.StarfireRank3) then ids.Ability.Starfire = ids.Rank.StarfireRank3;
