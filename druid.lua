@@ -163,6 +163,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
         local _Starfall_BUFF = ConROC:Aura(_Starfall, timeShift);
     local _Sunfire, _Sunfire_RDY = ConROC:AbilityReady(Runes.Sunfire, timeShift);
         local _Sunfire_DEBUFF = ConROC:TargetAura(_Sunfire, timeShift);
+    local _SwipeCF, _SwipeCF_RDY = ConROC:AbilityReady(Runes.SwipeCF, timeShift);
 
 --Conditions
     local _is_stealthed = IsStealthed();
@@ -210,6 +211,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
 --Indicators
     ConROC:AbilityRaidBuffs(_MarkoftheWild, _MarkoftheWild_RDY and not _MarkoftheWild_BUFF);
     ConROC:AbilityInterrupt(_SkullBash, ConROC:Interrupt() and _SkullBash_RDY)
+	ConROC:AbilityTaunt(_Maul, _BearForm_FORM and _Maul_RDY and _Rage >= 30);
 
 --Rotations
     repeat
@@ -362,6 +364,13 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         break;
                     end
 
+                    if _Swipe_RDY and _Rage >= 20 and _enemies_in_melee >= 3 then
+                        tinsert(ConROC.SuggestedSpells, _Swipe);
+                        _Rage = _Rage - 20;
+                        _Queue = _Queue + 1;
+                        break;
+                    end
+
                     if _Lacerate_RDY and _Rage >= _Lacerate_COST and _Lacerate_COUNT == 5 and _Lacerate_DUR <=1.5 then
                         tinsert(ConROC.SuggestedSpells, _Lacerate);
                         _Lacerate_COUNT = _Lacerate_COUNT + 1;
@@ -372,7 +381,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                     end
 
                     if _MangleBear_RDY and _Rage >= 15 and not _MangleBear_DEBUFF and _MangleBear_DUR <= 1.2 then
-                        tinsert(ConROC.SuggestedSpells, _BearMangle);
+                        tinsert(ConROC.SuggestedSpells, _MangleBear);
                         _MangleBear_RDY = false;
                         _MangleBear_DEBUFF = true;
                         _MangleBear_DUR = 60;
@@ -390,14 +399,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         break;
                     end
 
-                    if _Swipe_RDY and _Rage >= 20 and (_Rage >= _Rage_Max - 40 or _target_in_melee >= 3) then
-                        tinsert(ConROC.SuggestedSpells, _Swipe);
-                        _Rage = _Rage - 20;
-                        _Queue = _Queue + 1;
-                        break;
-                    end
-
-                    if _Maul_RDY then
+                    if _Maul_RDY and _Rage > 80 then
                         tinsert(ConROC.SuggestedSpells, _Maul);
                         _Maul_RDY = false;
                         _Rage = _Rage - 15;
@@ -636,21 +638,20 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         break;
                     end
 
-                    if _Maul_RDY then
-                        tinsert(ConROC.SuggestedSpells, _Maul);
-                        _Maul_RDY = false;
-                        _Rage = _Rage - 15;
-                        _Queue = _Queue + 1;
-                        break;
-                    end
-
-                    if _Swipe_RDY and _Rage >= 20 and (_Rage >= _Rage_Max - 40 or _target_in_melee >= 3) then
+                    if _Swipe_RDY and _Rage >= 20 and (_Rage >= _Rage_Max - 40 or _enemies_in_melee >= 3) then
                         tinsert(ConROC.SuggestedSpells, _Swipe);
                         _Rage = _Rage - 20;
                         _Queue = _Queue + 1;
                         break;
                     end
 
+                    if _Maul_RDY and _Rage > 80 then
+                        tinsert(ConROC.SuggestedSpells, _Maul);
+                        _Maul_RDY = false;
+                        _Rage = _Rage - 15;
+                        _Queue = _Queue + 1;
+                        break;
+                    end
                 elseif _MoonkinForm_FORM then
                     if not _in_combat then
                         if _Starfire_RDY then
@@ -666,7 +667,7 @@ function ConROC.Druid.Damage(_, timeShift, currentSpell, gcd)
                         end
                     end
 
-                    if _Hurricane_RDY and (_target_in_melee >= 4 or ConROC_AoEButton:IsVisible()) then
+                    if _Hurricane_RDY and (_enemies_in_melee >= 4 or ConROC_AoEButton:IsVisible()) then
                         tinsert(ConROC.SuggestedSpells, _Hurricane);
                         _Hurricane_RDY = false;
                         _Queue = _Queue + 1;

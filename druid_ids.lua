@@ -170,6 +170,7 @@ ids.Rank = {
 	MaulRank5 = 9745,
 	MaulRank6 = 9880,
 	MaulRank7 = 9881,
+	SwipeRank1 = 779,
 	SwipeRank2 = 780,
 	SwipeRank3 = 769,
 	SwipeRank4 = 9754,
@@ -237,7 +238,7 @@ ids.Balance_Talent = {
 	Vengeance =  14,
 	MoonkinForm =  15,
 	ImprovedNaturesGrasp =  16,
-} 
+}
 ids.FeralCombat_Talent = {
 	ThickHide =  1,
 	FeralAggression =  2,
@@ -282,6 +283,7 @@ ids.Runes = {
 	StarSurge = 417157,
 	Starfall = 439748,
 	Sunfire = 414684,
+	SwipeCF = 411128,
 
 	MangleBear = 407995,
 	MangleCat = 407993,
